@@ -1,0 +1,164 @@
+﻿@model IEnumerable<LeaveManagement.Models.LeaveRequest>
+
+<h2>Leave Requests</h2>
+
+<form asp-controller="LeaveRequest" asp-action="Search" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="query" class="form-control" placeholder="Enter employee name" />
+        <select name="status" class="form-control">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+        </select>
+        <select name="leaveType" class="form-control">
+            <option value="">All Leave Types</option>
+            <option value="Sick">Sick Leave</option>
+            <option value="Annual">Annual Leave</option>
+            <option value="Bonus">Bonus Leave</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+<div class="row">
+    <div class="col-md-8">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Submitter</th>
+                    <th>Leave Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Comments</th>
+                    <th>Medical Report</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in Model)
+                {
+                    <tr>
+                        <td>@(request.SubmittedBy != null ? request.SubmittedBy.UserName : "N/A")</td>
+                        <td>@request.LeaveType</td>
+                        <td>@request.StartDate.ToShortDateString()</td>
+                        <td>@request.EndDate.ToShortDateString()</td>
+                        <td>
+                            @if (request.Status == "Pending")
+                            {
+                                <span class="btn btn-secondary btn-sm">Pending</span>
+                            }
+                            else if (request.Status == "Approved")
+                            {
+                                <span class="btn btn-success btn-sm">Approved</span>
+                            }
+                            else if (request.Status == "Rejected")
+                            {
+                                <span class="btn btn-danger btn-sm">Rejected</span>
+                            }
+                            else
+                            {
+                                <span class="btn btn-light btn-sm">N/A</span>
+                            }
+                        </td>
+                        <td>@request.Comments</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(request.MedicalReportPath))
+                            {
+                                <a href="@Url.Content("~/uploads/" + request.MedicalReportPath)" target="_blank">View Report</a>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </td>
+                        <td>
+                            @if (User.IsInRole("HR"))
+                            {
+                                if (request.Status == "Pending")
+                                {
+                                    <div class="btn-group" role="group">
+                                        <form asp-action="Approve" method="post" style="display:inline;">
+                                            <input type="hidden" name="id" value="@request.Id" />
+                                            <button type="submit" class="btn btn-success">Approve</button>
+                                        </form>
+                                        <form asp-action="Reject" method="post" style="display:inline;">
+                                            <input type="hidden" name="id" value="@request.Id" />
+                                            <button type="submit" class="btn btn-danger">Reject</button>
+                                        </form>
+                                    </div>
+                                }
+                                <form asp-controller="HR" asp-action="DeleteLeaveRequest" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@request.Id" />
+                                    <button type="submit" class="btn btn-warning">Delete</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a class="btn btn-secondary" asp-controller="Account" asp-action="Profile">Back</a>
+    </div>
+
+    <div class="col-md-4">
+        <div id="calendar" style="margin-left: 20px;"></div> <!-- Added margin to the left -->
+    </div>
+</div>
+
+<!-- Include FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+
+<!-- Include FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+<!-- Include Popper.js for tooltips -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+
+<!-- Include Tooltip.js for tooltips -->
+<script src="https://cdn.jsdelivr.net/npm/tooltip.js/dist/tooltip.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: [
+                @foreach (var request in Model)
+                {
+        if (request.Status == "Approved") // Only show approved requests
+        {
+            for (var date = request.StartDate; date <= request.EndDate; date = date.AddDays(1))
+            {
+                <text>{
+                         title: '@request.SubmittedBy.Email',
+                         start: '@date.ToString("yyyy-MM-dd")',
+                         end: '@date.AddDays(1).ToString("yyyy-MM-dd")',
+                         color: 'red' // Mark the days in red
+                 },</text>
+            }
+        }
+    }
+            ],
+            eventMouseEnter: function(info) {
+                var tooltip = new Tooltip(info.event.el, {
+                    title: info.event.title,
+                    placement: 'top',
+                    trigger: 'hover',
+                    container: 'body'
+                });
+                tooltip.show();
+            },
+            eventMouseLeave: function(info) {
+                // Hide the tooltip when the mouse leaves the event
+                Tooltip.hide();
+            }
+        });
+
+        calendar.render();
+    });
+</script>
