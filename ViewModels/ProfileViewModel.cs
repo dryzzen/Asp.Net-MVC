@@ -22,9 +22,9 @@ namespace LeaveManagement.ViewModels
 
         // Leave information
         public int RemainingAnnualLeave { get; set; }
-
-        public int TotalAnnualLeaveTaken { get; set; }
         public int RemainingBonusLeave { get; set; }
+        public int TotalAnnualLeaveTaken { get; set; }
+      
         public int TotalBonusLeaveTaken { get; set; }
         public int SickDaysTaken { get; set; } 
      

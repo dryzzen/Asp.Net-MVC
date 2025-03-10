@@ -111,26 +111,11 @@ public class LeaveService
 
     public async Task<int> GetRemainingBonusLeave(string userId)
     {
+
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
             return 0; // User not found
-        }
-
-        // Check if the current year is the same as the year when bonus leave was last granted
-        var currentYear = DateTime.Now.Year;
-        var lastGrantedBonusLeaveYear = await _context.LeaveRequests
-            .Where(lr => lr.UserId == userId && lr.LeaveType == "Bonus" && lr.Status == "Approved")
-            .OrderByDescending(lr => lr.StartDate)
-            .Select(lr => lr.StartDate.Year)
-            .FirstOrDefaultAsync();
-
-        // If no bonus leave was granted this year, reset to 0
-        if (lastGrantedBonusLeaveYear != currentYear)
-        {
-            user.BonusLeaveDays = 0; // Reset bonus leave days
-            await _userManager.UpdateAsync(user); // Update the user
-            return 0; 
         }
 
         // Calculate remaining bonus leave days
@@ -147,7 +132,7 @@ public class LeaveService
             return 0;
         });
 
-        return user.BonusLeaveDays - usedBonusLeaveDays; // Return remaining days
+        return user.BonusLeaveDays - usedBonusLeaveDays;
     }
 
 

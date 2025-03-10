@@ -74,23 +74,23 @@
                         var leaveChart = new Chart(ctx, {
                             type: 'pie',
                             data: {
-                                labels: ['Annual Leave Taken', 'Annual Leave Remaining', 'Bonus Leave Remaining', 'Sick Days Taken'],
+                                labels:['Annual Leave Taken', 'Annual Leave Remaining', 'Bonus Leave Taken', 'Bonus Leave Remaining', 'Sick Days Taken'],
                                 datasets: [{
                                     label: 'Leave Information',
-                                    data: [
-                        @((21 - Model.RemainingAnnualLeave)), // Annual Leave Taken
+                                               data: [
+                        @Model.TotalAnnualLeaveTaken,, // Annual Leave Taken
                         @Model.RemainingAnnualLeave, // Annual Leave Remaining
-                        @Model.TotalBonusLeaveTaken,
+                        @Model.TotalBonusLeaveTaken, // Bonus Leave Taken
                         @Model.RemainingBonusLeave, // Bonus Leave Remaining
                         @Model.SickDaysTaken // Sick Days Taken
-                                    ],
-                                    backgroundColor: [
-                                        'rgba(255, 99, 132, 0.6)', // Taken Annual Leave
-                                        'rgba(75, 192, 192, 0.6)', // Remaining Annual Leave
-                                        'rgba(54, 162, 235, 0.6)', // Taken Bonus Leave
-                                        'rgba(255, 206, 86, 0.6)', // Remaining Bonus Leave
-                                        'rgba(153, 102, 255, 0.6)' // Sick Days Taken
-                                    ],
+                        ],
+                                                           backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)', // Annual Leave Taken
+                            'rgba(75, 192, 192, 0.6)', // Annual Leave Remaining
+                            'rgba(54, 162, 235, 0.6)', // Bonus Leave Taken
+                            'rgba(255, 206, 86, 0.6)', // Bonus Leave Remaining
+                            'rgba(153, 102, 255, 0.6)' // Sick Days Taken
+                        ],
                                     borderColor: [
                                         'rgba(255, 99, 132, 1)',
                                         'rgba(75, 192, 192, 1)',

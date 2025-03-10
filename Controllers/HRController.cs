@@ -162,9 +162,9 @@ namespace LeaveManagement.Controllers
                 LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,
                 Position = user.Position,
-                AnnualLeaveDays = await _leaveService.GetRemainingAnnualLeave(user.Id),
-                BonusLeaveDays = await _leaveService.GetRemainingBonusLeave(user.Id),
-                Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() // Get the user's current role
+                AnnualLeaveDays = user.AnnualLeaveDays,
+                BonusLeaveDays = user.BonusLeaveDays,
+                Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() 
             };
 
             return View(model);
@@ -190,6 +190,7 @@ namespace LeaveManagement.Controllers
                 user.AnnualLeaveDays = model.AnnualLeaveDays;
                 user.BonusLeaveDays = model.BonusLeaveDays;
 
+                //ne go menvaj ova bidejki ti resetira roles , vaka raboti
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 await _userManager.AddToRoleAsync(user, model.Role);

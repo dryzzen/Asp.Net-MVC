@@ -167,13 +167,7 @@ public class AccountController : Controller
             return NotFound();
         }
 
-        var remainingAnnualLeave = await _leaveService.GetRemainingAnnualLeave(user.Id);
-        var totalAnnualLeaveTaken = await _leaveService.GetTotalAnnualLeaveTaken(user.Id);
 
-        var remainingBonusLeave = await _leaveService.GetRemainingBonusLeave(user.Id);
-        var totalBonusLeaveTaken = await _leaveService.GetTotalBonusLeaveTaken(user.Id); 
-
-        var sickDaysTaken = await _leaveService.GetSickDaysTaken(user.Id);
 
         var model = new ProfileViewModel
         {
@@ -181,18 +175,19 @@ public class AccountController : Controller
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth,
             Position = user.Position,
-            RemainingAnnualLeave = remainingAnnualLeave,
-            TotalAnnualLeaveTaken = totalAnnualLeaveTaken,
 
-            RemainingBonusLeave = remainingBonusLeave,
-            TotalBonusLeaveTaken = totalBonusLeaveTaken,
-
-            SickDaysTaken = sickDaysTaken,
-         
+            // Leave information
+            RemainingAnnualLeave = user.AnnualLeaveDays, 
+            RemainingBonusLeave = user.BonusLeaveDays,  
+            TotalAnnualLeaveTaken = await _leaveService.GetTotalAnnualLeaveTaken(user.Id),
+            TotalBonusLeaveTaken = await _leaveService.GetTotalBonusLeaveTaken(user.Id), 
+            SickDaysTaken = await _leaveService.GetSickDaysTaken(user.Id) 
         };
 
         return View(model);
     }
+
+    
 
     [HttpPost]
     [ValidateAntiForgeryToken]
