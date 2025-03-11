@@ -1,0 +1,66 @@
+﻿@model LeaveManagement.ViewModels.LeaveRequestViewModel
+
+<h2>Submit Leave Request</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="LeaveType"></label>
+        <select asp-for="LeaveType" class="form-control" required>
+            <option value="">-- Select Leave Type --</option>
+            <option value="Annual">Annual Leave</option>
+            <option value="Bonus">Bonus Leave</option>
+            <option value="Sick">Sick Leave</option>
+        </select>
+        <span asp-validation-for="LeaveType" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="StartDate"></label>
+        <input asp-for="StartDate" class="form-control" type="date" required />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EndDate"></label>
+        <input asp-for="EndDate" class="form-control" type="date" required />
+        <span asp-validation-for="EndDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Comments"></label>
+        <textarea asp-for="Comments" class="form-control"></textarea>
+        <span asp-validation-for="Comments" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+    <a class="btn btn-secondary" asp-controller="LeaveRequest" asp-action="Index">Back</a>
+</form>
+
+@section Scripts {
+   
+    <script>
+        //vo slucaj da se odberi leavetype sick da ne prenasoci vo toj CreateSickLeave + SickLeaveRequestViewModel
+        $(document).ready(function () {
+            $('#LeaveType').change(function () {
+                if ($(this).val() === 'Sick') {
+                    // Redirect to the CreateSickLeave action
+                    window.location.href = '@Url.Action("CreateSickLeave", "LeaveRequest")';
+                }
+            });
+        });
+        //validacija za da nemozi usero da odberi end date pred od start date
+         function validateDates() {
+            var startDate = new Date(document.getElementById('startDate').value);
+            var endDate = new Date(document.getElementById('endDate').value);
+
+            // Check if end date is earlier than start date
+            if (endDate < startDate) {
+                alert("The end date cannot be earlier than the start date. Please select a valid date range.");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
+    </script>
+}

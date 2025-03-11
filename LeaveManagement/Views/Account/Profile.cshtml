@@ -1,0 +1,128 @@
+﻿@model LeaveManagement.ViewModels.ProfileViewModel
+
+<div class="container mt-4">
+    <h2 class="text-center">Profile</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Profile Info Column -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Profile" method="post">
+                        <div asp-validation-summary="All" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="FirstName"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="LastName"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="DateOfBirth"></label>
+                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Position"></label>
+                            <input asp-for="Position" class="form-control" />
+                            <span asp-validation-for="Position" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-2">Update Profile</button>
+                    </form>
+
+                    <div class="mt-3">
+                        <a class="btn btn-primary" asp-controller="LeaveRequest" asp-action="Index">Manage Leave Requests</a>
+                        <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Back</a>
+                        @if (User.IsInRole("HR"))
+                        {
+                            <a asp-controller="HR" asp-action="UserList" class="btn btn-primary">View Users</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Pie Chart Column -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Leave Request Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Remaining Annual Leave Days:</strong> @Model.RemainingAnnualLeave</p>
+                    <p><strong>Remaining Bonus Leave Days:</strong> @Model.RemainingBonusLeave</p>
+                    <p><strong>Sick Days Taken:</strong> @Model.SickDaysTaken</p>
+
+                    <!-- Pie Chart -->
+                    <div style="position: relative; width: 100%; height: 400px; margin: auto;">
+                        <canvas id="leaveChart" width="400" height="300"></canvas>
+                    </div>
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script>
+                        var ctx = document.getElementById('leaveChart').getContext('2d');
+                        var leaveChart = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: [
+                                    'Annual Leave Taken',
+                                    'Annual Leave Remaining',
+                                    'Bonus Leave Taken',
+                                    'Bonus Leave Remaining',
+                                    'Sick Days Taken'
+                                ],
+                                datasets: [{
+                                    label: 'Leave Information',
+                                    data: [
+                        @Model.TotalAnnualLeaveTaken, // Annual Leave Taken
+                        @Model.RemainingAnnualLeave,  // Annual Leave Remaining
+                        @Model.TotalBonusLeaveTaken,  // Bonus Leave Taken
+                        @Model.RemainingBonusLeave,   // Bonus Leave Remaining
+                        @Model.SickDaysTaken         // Sick Days Taken
+                                    ],
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.6)', // Annual Leave Taken
+                                        'rgba(75, 192, 192, 0.6)', // Annual Leave Remaining
+                                        'rgba(54, 162, 235, 0.6)', // Bonus Leave Taken
+                                        'rgba(255, 206, 86, 0.6)',  // Bonus Leave Remaining
+                                        'rgba(153, 102, 255, 0.6)'  // Sick Days Taken
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(153, 102, 255, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Leave Information'
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
