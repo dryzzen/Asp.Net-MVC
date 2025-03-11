@@ -97,7 +97,7 @@ public class AccountController : Controller
     {
         return View();
     }
-
+    
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
@@ -157,6 +157,7 @@ public class AccountController : Controller
         return View();
     }
 
+    //changed the SickLeave
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
