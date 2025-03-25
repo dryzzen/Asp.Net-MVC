@@ -41,7 +41,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Serve files from the uploads directory
+//da se cuvat ovde filovite xD
 var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
 if (!Directory.Exists(uploadsPath))
 {
@@ -64,13 +64,13 @@ app.MapControllerRoute(
 
 app.Run();
 
-// Seed method definition
+//kreirame glaven Hr ovde
 async Task SeedRolesAndUsers(IServiceProvider serviceProvider)
 {
     var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    string[] roleNames = { "HR", "User " }; // Fixed extra space in "User  "
+    string[] roleNames = { "HR", "User " }; 
     IdentityResult roleResult;
 
     foreach (var roleName in roleNames)
@@ -78,28 +78,28 @@ async Task SeedRolesAndUsers(IServiceProvider serviceProvider)
         var roleExist = await roleManager.RoleExistsAsync(roleName);
         if (!roleExist)
         {
-            // Create the roles and seed them to the database
+         
             roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
         }
     }
 
-    // Optionally, create a default HR user and assign the HR role
-    var poweruser = new ApplicationUser
+    // ovde se kreira prvio user Hr so mozi da praj se 
+    var Glaven = new ApplicationUser
     {
         UserName = "hr@example.com",
         Email = "hr@example.com",
         // Set other properties as needed
     };
 
-    string userPassword = "Password123!"; // Use a secure password
-    var user = await userManager.FindByEmailAsync(poweruser.Email);
+    string userPassword = "Password123!"; //passo
+    var user = await userManager.FindByEmailAsync(Glaven.Email);
 
     if (user == null)
     {
-        var createPowerUser = await userManager.CreateAsync(poweruser, userPassword);
+        var createPowerUser = await userManager.CreateAsync(Glaven, userPassword);
         if (createPowerUser.Succeeded)
         {
-            await userManager.AddToRoleAsync(poweruser, "HR");
+            await userManager.AddToRoleAsync(Glaven, "HR");
         }
     }
 }

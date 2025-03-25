@@ -28,7 +28,7 @@ namespace LeaveManagement.Controllers
             _leaveService = leaveService;
         }
 
-        // GET: LeaveRequest/Index
+        //za prikaz na site leave requestoj na usero
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -97,7 +97,9 @@ namespace LeaveManagement.Controllers
                 ModelState.AddModelError("", "The end date cannot be earlier than the start date.");
                 return View(model);
             }
-  
+            
+
+            //ima pomalce denovi od baranite
             if (model.LeaveType == "Annual" && requestedDays > await _leaveService.GetRemainingAnnualLeave(user.Id))
             {
                 ModelState.AddModelError("", "You do not have enough annual leave days.");
@@ -134,6 +136,8 @@ namespace LeaveManagement.Controllers
             return View();
         }
 
+
+        //ti treba ova bidejki MedicalReportPath iako e nullable pak go bara za annual i za bonus days , vaka si ima seperate method.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateSickLeave(SickLeaveRequestViewModel model)
@@ -187,11 +191,10 @@ namespace LeaveManagement.Controllers
                 return View(model);
             }
 
-            // Create the leave request
             var leaveRequest = new LeaveRequest
             {
                 UserId = user.Id,
-                LeaveType = "Sick", // Ensure the leave type is set to "Sick"
+                LeaveType = "Sick",
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Comments = model.Comments,
@@ -199,6 +202,7 @@ namespace LeaveManagement.Controllers
                 Status = "Pending",
             };
 
+            //handle za filoj
             if (model.MedicalReport != null && model.MedicalReport.Length > 0)
             {
                 var uploadsFolderPath = Path.Combine(_environment.ContentRootPath, "uploads");

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LeaveManagement.ViewModels
 {
-    public class LeaveRequestViewModel : IValidatableObject
+    public class LeaveRequestViewModel 
     {
         [Required]
         [Display(Name = "Leave Type")]
@@ -22,12 +22,6 @@ namespace LeaveManagement.ViewModels
 
         public string Comments { get; set; }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if ((LeaveType == "Annual" || LeaveType == "Bonus") && string.IsNullOrWhiteSpace(Comments))
-            {
-                yield return new ValidationResult("Comments are required for Annual and Bonus leave.", new[] { nameof(Comments) });
-            }
-        }
+      
     }
 }

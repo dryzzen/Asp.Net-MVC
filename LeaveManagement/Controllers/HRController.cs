@@ -86,6 +86,7 @@ namespace LeaveManagement.Controllers
 
         public async Task<IActionResult> UserList()
         {
+        
             var users = await _userManager.Users.ToListAsync();
             var leaveRequests = await _context.LeaveRequests.ToListAsync();
 
@@ -93,15 +94,20 @@ namespace LeaveManagement.Controllers
             {
                 User = user,
                 SickDaysTaken = leaveRequests
-                    .Where(lr => lr.UserId == user.Id && lr.LeaveType == "Sick")
+                    .Where(lr => lr.UserId == user.Id && lr.LeaveType == "Sick" && lr.Status == "Approved")
                     .Sum(lr => (lr.EndDate - lr.StartDate).Days + 1),
-                AnnualLeaveDaysRemaining = user.AnnualLeaveDays,
-                BonusLeaveDaysRemaining = user.BonusLeaveDays
+                AnnualLeaveDaysRemaining = user.AnnualLeaveDays - leaveRequests
+                    .Where(lr => lr.UserId == user.Id && lr.LeaveType == "Annual" && lr.Status == "Approved")
+                    .Sum(lr => (lr.EndDate - lr.StartDate).Days + 1),
+                BonusLeaveDaysRemaining = user.BonusLeaveDays - leaveRequests
+                    .Where(lr => lr.UserId == user.Id && lr.LeaveType == "Bonus" && lr.Status == "Approved")
+                    .Sum(lr => (lr.EndDate - lr.StartDate).Days + 1)
             }).ToList();
 
             return View(userLeaveData);
-
         }
+
+        
 
        
         [HttpGet]
@@ -130,17 +136,16 @@ namespace LeaveManagement.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    // Assign the selected role (HR or User)
                     await _userManager.AddToRoleAsync(user, role);
 
-                    return RedirectToAction("UserList"); // Redirect to the user list after successful registration
+                    return RedirectToAction("UserList"); 
                 }
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-            return View(model); // Return the view with the model if there are validation errors
+            return View(model); 
         }
 
 
@@ -190,7 +195,7 @@ namespace LeaveManagement.Controllers
                 user.AnnualLeaveDays = model.AnnualLeaveDays;
                 user.BonusLeaveDays = model.BonusLeaveDays;
 
-                //ne go menvaj ova bidejki ti resetira roles , vaka raboti
+                //ne go menvaj ova bidejki ti resetirat roles , vaka raboti
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 await _userManager.AddToRoleAsync(user, model.Role);
@@ -220,24 +225,26 @@ namespace LeaveManagement.Controllers
                 return NotFound();
             }
 
-            //raboti ali poradi nekoja pricina "You cannot delete the HR user." ne izlegva. Vidi so e rabotata 
-            if (user.Email == "hr@example.com")
+            //raboti ali poradi nekoja pricina "You cannot delete the HR user." ne izlegva. Vidi so e rabotata . Isto taka ako probame dad go delete usero ni se javuva error
+            if (user.Email == "hr@example.com")//duri ne napram vi view da ne izlegva delete za usero neka sedi tuka, Userlist.
             {
-                ModelState.AddModelError(string.Empty, "You cannot delete the HR user.");
-              
-                var users = await _userManager.Users.ToListAsync();
-                return View("UserList", users); 
-            }
-
-            var result = await _userManager.DeleteAsync(user);
-            if (result.Succeeded)
-            {
+                TempData["Error"] = "Cannot delete HR user.";
                 return RedirectToAction("UserList");
             }
-            //handle errors ?
-            foreach (var error in result.Errors)
+
+
+            var userLeaveRequests = _context.LeaveRequests
+          .Where(lr => lr.UserId == id)
+         .ToList();
+
+            _context.LeaveRequests.RemoveRange(userLeaveRequests);
+            await _context.SaveChangesAsync(); 
+
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                TempData["Error"] = "Failed to delete user.";
             }
 
             return RedirectToAction("UserList"); 
@@ -291,6 +298,6 @@ namespace LeaveManagement.Controllers
             }
             return RedirectToAction("Index");
         }
-
+        
     }
 }

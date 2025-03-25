@@ -10,7 +10,9 @@ namespace LeaveManagement.Data
             : base(options)
         {
         }
+
         public DbSet<LeaveRequest> LeaveRequests { get; set; }
 
+     
     }
 }

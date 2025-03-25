@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LeaveManagement.Models
 {
@@ -6,6 +7,7 @@ namespace LeaveManagement.Models
     {
         public int Id { get; set; }
 
+        [ForeignKey("SubmittedBy")]
         public string UserId { get; set; }
 
         [Required]

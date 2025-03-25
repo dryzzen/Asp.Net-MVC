@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] - LeaveManagement</title>
     <meta name="description" content="Leave Management System for managing employee leave requests." />
     <meta name="keywords" content="Leave Management, Employee, Leave Requests" />
-    <link rel="icon" type="image/png" href="~/favicon.png" /> <!-- Favicon -->
+    <link rel="icon" type="image/png" href="~/favicon.png" /> 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LeaveManagement.styles.css" asp-append-version="true" />
@@ -34,9 +34,9 @@
                         }
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
+                           @*  <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="LeaveRequest" asp-action="Index">Leave Requests</a>
-                            </li>
+                            </li> *@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Profile">Profile</a>
                             </li>

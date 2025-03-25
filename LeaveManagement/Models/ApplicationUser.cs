@@ -11,5 +11,8 @@ namespace LeaveManagement.Models
         public int AnnualLeaveDays { get; set; } = 21; 
         public int BonusLeaveDays { get; set; } = 0;
         public int SickLeaveDays { get; set; }
+
+
+
     }
 }

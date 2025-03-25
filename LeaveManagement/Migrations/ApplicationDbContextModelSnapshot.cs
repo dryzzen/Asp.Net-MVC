@@ -148,7 +148,7 @@ namespace LeaveManagement.Migrations
 
                     b.HasIndex("SubmittedById");
 
-                    b.ToTable("LeaveRequests");
+                    b.ToTable("LeaveRequests", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
