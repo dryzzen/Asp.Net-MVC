@@ -4,6 +4,7 @@ using LeaveManagement.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using LeaveManagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 
-builder.Services.AddScoped<LeaveService>();
+builder.Services.AddScoped<ILeaveService,LeaveService>();
 
 var app = builder.Build();
 

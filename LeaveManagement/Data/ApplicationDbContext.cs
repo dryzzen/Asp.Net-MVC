@@ -11,8 +11,18 @@ namespace LeaveManagement.Data
         {
         }
 
-        public DbSet<LeaveRequest> LeaveRequests { get; set; }
+        public virtual DbSet<LeaveRequest> LeaveRequests { get; set; }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
 
-     
+            
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.LeaveRequests)
+                .WithOne(lr => lr.SubmittedBy)
+                .HasForeignKey(lr => lr.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+        }
+
     }
 }

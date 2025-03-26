@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using LeaveManagement.Services;
 
 namespace LeaveManagement.Controllers
 {
@@ -18,9 +19,9 @@ namespace LeaveManagement.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
-        private readonly LeaveService _leaveService;
+        private readonly ILeaveService _leaveService;
 
-        public LeaveRequestController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment environment,LeaveService leaveService)
+        public LeaveRequestController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment environment,ILeaveService leaveService)
         {
             _userManager = userManager;
             _context = context;
@@ -244,34 +245,5 @@ namespace LeaveManagement.Controllers
             return View("SearchResults", leaveRequests); 
         }
 
-       
-       
-
-        public async Task<IActionResult> ApproveRequests()
-        {
-            var pendingRequests = await _context.LeaveRequests
-                .Where(lr => lr.Status == "Pending")
-                .Include(lr => lr.SubmittedBy)
-                .ToListAsync();
-
-            return View(pendingRequests);
-        }
-
-      
-
-        [Authorize(Roles = "HR")] 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Reject(int id)
-        {
-            var leaveRequest = await _context.LeaveRequests.FindAsync(id);
-            if (leaveRequest != null)
-            {
-                leaveRequest.Status = "Rejected";
-                
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction("ApproveRequests");
-        }
     }
 }

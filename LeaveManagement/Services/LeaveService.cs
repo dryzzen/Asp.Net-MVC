@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using LeaveManagement.Models;
+using LeaveManagement.Services;
 
-public class LeaveService
+public class LeaveService : ILeaveService
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;

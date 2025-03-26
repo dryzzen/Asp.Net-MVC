@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using LeaveManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using LeaveManagement.Data;
+using LeaveManagement.Services;
 
 
 public class AccountController : Controller
@@ -12,10 +13,10 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ApplicationDbContext _context; // DbContext
-    private readonly LeaveService _leaveService;
+    private readonly ILeaveService _leaveService;
 
 
-    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ApplicationDbContext context,LeaveService leaveService)
+    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ApplicationDbContext context,ILeaveService leaveService)
     {
         _userManager = userManager;
         _signInManager = signInManager;

@@ -12,6 +12,7 @@ namespace LeaveManagement.Models
         public int BonusLeaveDays { get; set; } = 0;
         public int SickLeaveDays { get; set; }
 
+        public ICollection<LeaveRequest> LeaveRequests { get; set; }// to link 
 
 
     }

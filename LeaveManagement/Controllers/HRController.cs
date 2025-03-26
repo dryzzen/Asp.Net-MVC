@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Threading.Tasks;
+using LeaveManagement.Services;
 
 namespace LeaveManagement.Controllers
 {
@@ -15,9 +16,9 @@ namespace LeaveManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly LeaveService _leaveService;
+        private readonly ILeaveService _leaveService;
 
-        public HRController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, LeaveService leaveService)
+        public HRController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILeaveService leaveService)
         {
             _context = context;
             _userManager = userManager;
@@ -86,30 +87,31 @@ namespace LeaveManagement.Controllers
 
         public async Task<IActionResult> UserList()
         {
-        
             var users = await _userManager.Users.ToListAsync();
             var leaveRequests = await _context.LeaveRequests.ToListAsync();
 
-            var userLeaveData = users.Select(user => new
+            var userLeaveData = users.Select(user => new UserListViewModel
             {
-                User = user,
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DateOfBirth = user.DateOfBirth?.ToString("yyyy-MM-dd"),
+                Position = user.Position,
+                AnnualLeaveDaysRemaining = user.AnnualLeaveDays,
+                BonusLeaveDaysRemaining = user.BonusLeaveDays,
                 SickDaysTaken = leaveRequests
-                    .Where(lr => lr.UserId == user.Id && lr.LeaveType == "Sick" && lr.Status == "Approved")
-                    .Sum(lr => (lr.EndDate - lr.StartDate).Days + 1),
-                AnnualLeaveDaysRemaining = user.AnnualLeaveDays - leaveRequests
-                    .Where(lr => lr.UserId == user.Id && lr.LeaveType == "Annual" && lr.Status == "Approved")
-                    .Sum(lr => (lr.EndDate - lr.StartDate).Days + 1),
-                BonusLeaveDaysRemaining = user.BonusLeaveDays - leaveRequests
-                    .Where(lr => lr.UserId == user.Id && lr.LeaveType == "Bonus" && lr.Status == "Approved")
+                    .Where(lr => lr.UserId == user.Id &&
+                                 lr.LeaveType == "Sick" &&
+                                 lr.Status == "Approved")
                     .Sum(lr => (lr.EndDate - lr.StartDate).Days + 1)
             }).ToList();
 
             return View(userLeaveData);
         }
 
-        
 
-       
+
         [HttpGet]
         public IActionResult RegisterUser()
         {
