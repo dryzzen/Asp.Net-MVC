@@ -12,7 +12,7 @@ namespace LeaveManagement.Models
 
         [Required]
         [Display(Name = "Leave Type")]
-        public string LeaveType { get; set; }
+        public LeaveType LeaveType { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
@@ -24,7 +24,7 @@ namespace LeaveManagement.Models
         [Display(Name = "End Date")]
         public DateTime EndDate { get; set; }
 
-        public string Status { get; set; } = "Pending";
+        public LeaveStatus Status { get; set; } = LeaveStatus.Pending;
 
         public string Comments { get; set; }
 

@@ -6,6 +6,7 @@ using LeaveManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using LeaveManagement.Data;
 using LeaveManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 public class AccountController : Controller
@@ -185,8 +186,9 @@ public class AccountController : Controller
         return View(model);
     }
 
-    
+
     //vo slucaj da saka usero da promeni nesto na ProfilePage , da se updatni i saveni
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Profile(ProfileViewModel model)

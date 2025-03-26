@@ -1,4 +1,4 @@
-using Moq;
+﻿using Moq;
 using Xunit;
 using LeaveManagement.Controllers;
 using LeaveManagement.Data;
@@ -25,12 +25,13 @@ namespace LeaveManagement.UnitTests
         private readonly Mock<IWebHostEnvironment> _mockEnv;
         private readonly Mock<ILeaveService> _mockLeaveService;
         private readonly LeaveRequestController _controller;
+        private readonly Mock<IFileUploadService> _fileUploadService;
 
         public LeaveRequestControllerTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-          .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) 
-          .Options;
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
 
             _dbContext = new ApplicationDbContext(options);
 
@@ -42,29 +43,30 @@ namespace LeaveManagement.UnitTests
             _mockEnv.Setup(e => e.WebRootPath).Returns("wwwroot");
             _mockLeaveService = new Mock<ILeaveService>();
 
+            _fileUploadService = new Mock<IFileUploadService>();
+
             _controller = new LeaveRequestController(
                 _mockUserManager.Object,
-                _dbContext, 
+                _dbContext,
                 _mockEnv.Object,
-                _mockLeaveService.Object);
+                _mockLeaveService.Object,
+                _fileUploadService.Object); // ← FIXED
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.NameIdentifier, "1"),
+        new Claim(ClaimTypes.NameIdentifier, "1"),
             }));
             _controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = user }
             };
         }
-
         [Fact]
         public async Task Create_ValidAnnualRequest_RedirectsToIndex()
         {
-            // Arrange
             var model = new LeaveRequestViewModel
             {
-                LeaveType = "Annual",
+                LeaveType = LeaveType.Annual,
                 StartDate = DateTime.Now.AddDays(1),
                 EndDate = DateTime.Now.AddDays(5),
                 Comments="Test Comments"
@@ -86,7 +88,7 @@ namespace LeaveManagement.UnitTests
 
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Single(await _dbContext.LeaveRequests.ToListAsync()); // Verify item was added
+            Assert.Single(await _dbContext.LeaveRequests.ToListAsync()); 
         }
 
         [Fact]
@@ -94,7 +96,7 @@ namespace LeaveManagement.UnitTests
         {
             var model = new LeaveRequestViewModel
             {
-                LeaveType = "Annual",
+                LeaveType = LeaveType.Annual,
                 StartDate = DateTime.Now.AddDays(1),
                 EndDate = DateTime.Now.AddDays(30)
             };
@@ -121,15 +123,14 @@ namespace LeaveManagement.UnitTests
             Assert.False(_controller.ModelState.IsValid);
             Assert.Contains("You do not have enough annual leave days",
                 _controller.ModelState[""].Errors[0].ErrorMessage);
-            Assert.Empty(await _dbContext.LeaveRequests.ToListAsync()); // Verify nothing was added
+            Assert.Empty(await _dbContext.LeaveRequests.ToListAsync()); 
         }
-
         [Fact]
         public async Task Create_ValidSickLeaveRequest_RedirectsToIndex()
         {
             var model = new SickLeaveRequestViewModel
             {
-                LeaveType = "Sick",
+                LeaveType = LeaveType.Sick,
                 StartDate = DateTime.Now.AddDays(1),
                 EndDate = DateTime.Now.AddDays(3),
                 Comments = "Sick leave request",
@@ -139,14 +140,10 @@ namespace LeaveManagement.UnitTests
             _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
                 .ReturnsAsync(new ApplicationUser { Id = "1" });
 
-
-
+            _fileUploadService.Setup(x => x.UploadMedicalReport(It.IsAny<IFormFile>()))
+                .ReturnsAsync((string)null);
 
             var result = await _controller.CreateSickLeave(model);
-
-
-
-
 
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);

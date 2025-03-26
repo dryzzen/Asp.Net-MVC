@@ -20,13 +20,15 @@ namespace LeaveManagement.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly ILeaveService _leaveService;
+        private readonly IFileUploadService _fileUploadService;
 
-        public LeaveRequestController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment environment,ILeaveService leaveService)
+        public LeaveRequestController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment environment,ILeaveService leaveService,IFileUploadService fileUploadService)
         {
             _userManager = userManager;
             _context = context;
             _environment = environment;
             _leaveService = leaveService;
+            _fileUploadService = fileUploadService;
         }
 
         //za prikaz na site leave requestoj na usero
@@ -45,7 +47,7 @@ namespace LeaveManagement.Controllers
         {
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LeaveRequestViewModel model)
@@ -58,17 +60,14 @@ namespace LeaveManagement.Controllers
             var user = await _userManager.GetUserAsync(User);
             int requestedDays = (model.EndDate - model.StartDate).Days + 1;
 
-            //Da ne mozi da se submitni request pred denesniot den
             if (model.StartDate < DateTime.Today)
             {
                 ModelState.AddModelError("", "You cannot submit a leave request for a date before today.");
                 return View(model);
             }
 
-
-            //samo eden request na vreme
             var existingRequest = await _context.LeaveRequests
-                .Where(lr => lr.UserId == user.Id && lr.Status == "Pending")
+                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Pending) // Changed to enum
                 .FirstOrDefaultAsync();
 
             if (existingRequest != null)
@@ -77,9 +76,8 @@ namespace LeaveManagement.Controllers
                 return View(model);
             }
 
-            //nemozi na odobren den pak da pustis request
             var overlappingRequests = await _context.LeaveRequests
-            .Where(lr => lr.UserId == user.Id && lr.Status == "Approved" &&
+            .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Approved && // Changed to enum
                   ((model.StartDate >= lr.StartDate && model.StartDate <= lr.EndDate) ||
                    (model.EndDate >= lr.StartDate && model.EndDate <= lr.EndDate) ||
                    (model.StartDate <= lr.StartDate && model.EndDate >= lr.EndDate)))
@@ -91,41 +89,35 @@ namespace LeaveManagement.Controllers
                 return View(model);
             }
 
-
-            //End date za request nemozi da e pomalo od Start date
-            if (model.EndDate < model.StartDate)
+            if (!IsValidDateRange(model.StartDate, model.EndDate))
             {
                 ModelState.AddModelError("", "The end date cannot be earlier than the start date.");
                 return View(model);
             }
-            
 
-            //ima pomalce denovi od baranite
-            if (model.LeaveType == "Annual" && requestedDays > await _leaveService.GetRemainingAnnualLeave(user.Id))
+            if (model.LeaveType == LeaveType.Annual && requestedDays > await _leaveService.GetRemainingAnnualLeave(user.Id)) // Changed to enum
             {
                 ModelState.AddModelError("", "You do not have enough annual leave days.");
             }
-            else if (model.LeaveType == "Bonus" && requestedDays > await _leaveService.GetRemainingBonusLeave(user.Id))
+            else if (model.LeaveType == LeaveType.Bonus && requestedDays > await _leaveService.GetRemainingBonusLeave(user.Id)) // Changed to enum
             {
                 ModelState.AddModelError("", "You do not have enough bonus leave days.");
             }
 
-           
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-           
             var leaveRequest = new LeaveRequest
             {
                 UserId = user.Id,
-                LeaveType = model.LeaveType,
+                LeaveType = model.LeaveType, // Now using enum
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Comments = model.Comments,
                 SubmittedBy = user,
-                Status = "Pending", 
+                Status = LeaveStatus.Pending, // Changed to enum
             };
 
             _context.LeaveRequests.Add(leaveRequest);
@@ -158,7 +150,7 @@ namespace LeaveManagement.Controllers
             }
 
             var overlappingRequests = await _context.LeaveRequests
-                .Where(lr => lr.UserId == user.Id && lr.Status == "Approved" &&
+                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Approved && // Changed to enum
                       ((model.StartDate >= lr.StartDate && model.StartDate <= lr.EndDate) ||
                        (model.EndDate >= lr.StartDate && model.EndDate <= lr.EndDate) ||
                        (model.StartDate <= lr.StartDate && model.EndDate >= lr.EndDate)))
@@ -177,7 +169,7 @@ namespace LeaveManagement.Controllers
             }
 
             var existingRequest = await _context.LeaveRequests
-                .Where(lr => lr.UserId == user.Id && lr.Status == "Pending")
+                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Pending) // Changed to enum
                 .FirstOrDefaultAsync();
 
             if (existingRequest != null)
@@ -186,7 +178,7 @@ namespace LeaveManagement.Controllers
                 return View(model);
             }
 
-            if (model.EndDate < model.StartDate)
+            if (!IsValidDateRange(model.StartDate, model.EndDate))
             {
                 ModelState.AddModelError("", "The end date cannot be earlier than the start date.");
                 return View(model);
@@ -195,32 +187,17 @@ namespace LeaveManagement.Controllers
             var leaveRequest = new LeaveRequest
             {
                 UserId = user.Id,
-                LeaveType = "Sick",
+                LeaveType = LeaveType.Sick, // Changed to enum
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Comments = model.Comments,
                 SubmittedBy = user,
-                Status = "Pending",
+                Status = LeaveStatus.Pending, // Changed to enum
             };
 
-            //handle za filoj
             if (model.MedicalReport != null && model.MedicalReport.Length > 0)
             {
-                var uploadsFolderPath = Path.Combine(_environment.ContentRootPath, "uploads");
-
-                if (!Directory.Exists(uploadsFolderPath))
-                {
-                    Directory.CreateDirectory(uploadsFolderPath);
-                }
-
-                var fileName = model.MedicalReport.FileName; 
-                var filePath = Path.Combine(uploadsFolderPath, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.MedicalReport.CopyToAsync(stream);
-                }
-                leaveRequest.MedicalReportPath = fileName; 
+                leaveRequest.MedicalReportPath = await _fileUploadService.UploadMedicalReport(model.MedicalReport);
             }
             else
             {
@@ -232,18 +209,27 @@ namespace LeaveManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> Search(string query, string status, string leaveType)
+        public async Task<IActionResult> Search(LeaveSearchViewModel filters)
         {
-            var leaveRequests = await _context.LeaveRequests
-                .Include(lr => lr.SubmittedBy) 
-                .Where(lr =>
-                    (string.IsNullOrEmpty(query) || lr.SubmittedBy.UserName.Contains(query) || lr.LeaveType.Contains(query)) &&
-                    (string.IsNullOrEmpty(status) || lr.Status == status) &&
-                    (string.IsNullOrEmpty(leaveType) || lr.LeaveType == leaveType)) 
-                .ToListAsync();
+            var query = _context.LeaveRequests.Include(lr => lr.SubmittedBy).AsQueryable();
 
-            return View("SearchResults", leaveRequests); 
+            if (!string.IsNullOrEmpty(filters.Query))
+                query = query.Where(lr => lr.SubmittedBy.UserName.Contains(filters.Query));
+
+            if (filters.Status.HasValue)
+                query = query.Where(lr => lr.Status == filters.Status.Value);
+
+            if (filters.LeaveType.HasValue)
+                query = query.Where(lr => lr.LeaveType == filters.LeaveType.Value);
+
+            return View("SearchResults", await query.ToListAsync());
         }
+
+        private bool IsValidDateRange(DateTime start, DateTime end)
+        {
+            return end >= start;
+        }
+
 
     }
 }

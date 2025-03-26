@@ -21,15 +21,15 @@
                 <td>@request.EndDate.ToShortDateString()</td>
                 <td>@request.Comments</td>
                 <td>
-                    @if (request.Status == "Pending")
+                    @if (request.Status == LeaveStatus.Pending)
                     {
                         <span class="btn btn-secondary btn-sm">Pending</span>
                     }
-                    else if (request.Status == "Approved")
+                    else if (request.Status == LeaveStatus.Approved)
                     {
                         <span class="btn btn-success btn-sm">Approved</span>
                     }
-                    else if (request.Status == "Rejected")
+                    else if (request.Status == LeaveStatus.Rejected)
                     {
                         <span class="btn btn-danger btn-sm">Rejected</span>
                     }
@@ -70,7 +70,7 @@
                 events: [
         @if (Model != null && Model.Any())
         {
-            var approvedRequests = Model.Where(m => m.Status == "Approved").ToList();
+            var approvedRequests = Model.Where(m => m.Status == LeaveStatus.Approved).ToList();
             for (int i = 0; i < approvedRequests.Count; i++)
             {
                 var request = approvedRequests[i];

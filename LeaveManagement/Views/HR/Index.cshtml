@@ -44,15 +44,15 @@
                         <td>@request.StartDate.ToShortDateString()</td>
                         <td>@request.EndDate.ToShortDateString()</td>
                         <td>
-                            @if (request.Status == "Pending")
+                            @if (request.Status == LeaveStatus.Pending)
                             {
                                 <span class="btn btn-secondary btn-sm">Pending</span>
                             }
-                            else if (request.Status == "Approved")
+                            else if (request.Status == LeaveStatus.Approved)
                             {
                                 <span class="btn btn-success btn-sm">Approved</span>
                             }
-                            else if (request.Status == "Rejected")
+                            else if (request.Status == LeaveStatus.Rejected)
                             {
                                 <span class="btn btn-danger btn-sm">Rejected</span>
                             }
@@ -75,7 +75,7 @@
                         <td>
                             @if (User.IsInRole("HR"))
                             {
-                                if (request.Status == "Pending")
+                                if (request.Status == LeaveStatus.Pending)
                                 {
                                     <div class="btn-group" role="group">
                                         <form asp-action="Approve" method="post" style="display:inline;">
@@ -130,7 +130,7 @@
             events: [
                 @foreach (var request in Model)
                 {
-        if (request.Status == "Approved") // Only show approved requests
+        if (request.Status == LeaveStatus.Approved) // Only show approved requests
         {
             for (var date = request.StartDate; date <= request.EndDate; date = date.AddDays(1))
             {

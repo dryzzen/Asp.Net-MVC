@@ -41,20 +41,20 @@ namespace LeaveManagement.Controllers
             var leaveRequest = await _context.LeaveRequests.FindAsync(id);
             if (leaveRequest != null)
             {
-                leaveRequest.Status = "Approved";
+                leaveRequest.Status = LeaveStatus.Approved;
 
                 var user = await _userManager.FindByIdAsync(leaveRequest.UserId);
                 int approvedDays = (leaveRequest.EndDate - leaveRequest.StartDate).Days + 1;
 
-                if (leaveRequest.LeaveType == "Annual")
+                if (leaveRequest.LeaveType == LeaveType.Annual)
                 {
                     user.AnnualLeaveDays -= approvedDays;
                 }
-                else if (leaveRequest.LeaveType == "Bonus")
+                if (leaveRequest.LeaveType == LeaveType.Bonus)
                 {
                     user.BonusLeaveDays -= approvedDays;
                 }
-                else if (leaveRequest.LeaveType == "Sick")
+                if (leaveRequest.LeaveType == LeaveType.Sick)
                 {
                     user.SickLeaveDays += approvedDays;
                 }
@@ -77,7 +77,7 @@ namespace LeaveManagement.Controllers
                 return NotFound();
             }
 
-            leaveRequest.Status = "Rejected";
+            leaveRequest.Status = LeaveStatus.Rejected;
             _context.LeaveRequests.Update(leaveRequest);
             await _context.SaveChangesAsync();
 
@@ -102,8 +102,8 @@ namespace LeaveManagement.Controllers
                 BonusLeaveDaysRemaining = user.BonusLeaveDays,
                 SickDaysTaken = leaveRequests
                     .Where(lr => lr.UserId == user.Id &&
-                                 lr.LeaveType == "Sick" &&
-                                 lr.Status == "Approved")
+                                 lr.LeaveType == LeaveType.Sick &&
+                                 lr.Status == LeaveStatus.Approved)
                     .Sum(lr => (lr.EndDate - lr.StartDate).Days + 1)
             }).ToList();
 
@@ -265,15 +265,15 @@ namespace LeaveManagement.Controllers
                 var user = await _userManager.FindByIdAsync(leaveRequest.UserId);
                 int approvedDays = (leaveRequest.EndDate - leaveRequest.StartDate).Days + 1;
 
-                if (leaveRequest.LeaveType == "Annual")
+                if (leaveRequest.LeaveType == LeaveType.Annual)
                 {
                     user.AnnualLeaveDays += approvedDays; 
                 }
-                else if (leaveRequest.LeaveType == "Bonus")
+                if (leaveRequest.LeaveType == LeaveType.Bonus)
                 {
                     user.BonusLeaveDays += approvedDays; 
                 }
-                else if (leaveRequest.LeaveType == "Sick")
+                if (leaveRequest.LeaveType == LeaveType.Sick)
                 {
                     user.SickLeaveDays -= approvedDays; 
                 }

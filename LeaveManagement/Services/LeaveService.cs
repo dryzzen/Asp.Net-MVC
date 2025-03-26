@@ -21,7 +21,7 @@ public class LeaveService : ILeaveService
     public async Task<int> GetSickDaysTaken(string userId)
     {
         var sickLeaveRequests = await _context.LeaveRequests
-            .Where(lr => lr.UserId == userId && lr.LeaveType == "Sick" && lr.Status == "Approved")
+            .Where(lr => lr.UserId == userId && lr.LeaveType == LeaveType.Sick && lr.Status ==LeaveStatus.Approved )
             .ToListAsync();
 
         var totalSickDaysTaken = sickLeaveRequests.Sum(lr =>
@@ -51,7 +51,7 @@ public class LeaveService : ILeaveService
         var secondPartDays = 11;
 
         var leaveRequests = await _context.LeaveRequests
-            .Where(lr => lr.UserId == userId && lr.LeaveType == "Annual" && lr.Status == "Approved")
+            .Where(lr => lr.UserId == userId && lr.LeaveType == LeaveType.Annual && lr.Status == LeaveStatus.Approved)
             .ToListAsync();
 
         var usedAnnualLeaveDays = leaveRequests.Sum(lr =>
@@ -97,7 +97,7 @@ public class LeaveService : ILeaveService
     public async Task<int> GetTotalAnnualLeaveTaken(string userId)
     {
         var leaveRequests = await _context.LeaveRequests
-            .Where(lr => lr.UserId == userId && lr.LeaveType == "Annual" && lr.Status == "Approved")
+            .Where(lr => lr.UserId == userId && lr.LeaveType == LeaveType.Annual && lr.Status == LeaveStatus.Approved)
             .ToListAsync();
 
         return leaveRequests.Sum(lr => (lr.EndDate - lr.StartDate).Days + 1);
@@ -121,7 +121,7 @@ public class LeaveService : ILeaveService
 
         // Calculate remaining bonus leave days
         var leaveRequests = await _context.LeaveRequests
-            .Where(lr => lr.UserId == userId && lr.LeaveType == "Bonus" && lr.Status == "Approved")
+            .Where(lr => lr.UserId == userId && lr.LeaveType == LeaveType.Bonus && lr.Status == LeaveStatus.Approved)
             .ToListAsync();
 
         var usedBonusLeaveDays = leaveRequests.Sum(lr =>
@@ -140,7 +140,7 @@ public class LeaveService : ILeaveService
     public async Task<int> GetTotalBonusLeaveTaken(string userId)
     {
         var bonusLeaveRequests = await _context.LeaveRequests
-            .Where(lr => lr.UserId == userId && lr.LeaveType == "Bonus" && lr.Status == "Approved")
+            .Where(lr => lr.UserId == userId && lr.LeaveType == LeaveType.Bonus && lr.Status == LeaveStatus.Approved)
             .ToListAsync();
 
         return bonusLeaveRequests.Sum(lr => (lr.EndDate - lr.StartDate).Days + 1); // Total days taken

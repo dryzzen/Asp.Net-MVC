@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using LeaveManagement.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace LeaveManagement.ViewModels
@@ -8,7 +9,7 @@ namespace LeaveManagement.ViewModels
     {
         [Required]
         [Display(Name = "Leave Type")]
-        public string LeaveType { get; set; } = "Sick";
+        public LeaveType LeaveType { get; set; } = LeaveType.Sick;
 
         [Required]
         [DataType(DataType.Date)]

@@ -5,49 +5,53 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using LeaveManagement.Services;
+using LeaveManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Database Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Identity Configuration
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
-builder.Services.AddScoped<ILeaveService,LeaveService>();
+// Custom Services
+builder.Services.AddScoped<ILeaveService, LeaveService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();
 
+// Database Migration and Seeding
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        await context.Database.MigrateAsync();
 
-    await dbContext.Database.MigrateAsync(); 
-
-    await SeedRolesAndUsers(services);
+        // Single seeding call to SeedData
+        await SeedData.Initialize(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred during migration or seeding");
+    }
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-
+// Rest of your middleware pipeline...
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-//da se cuvat ovde filovite xD
 var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
-if (!Directory.Exists(uploadsPath))
-{
-    Directory.CreateDirectory(uploadsPath);
-}
+if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsPath),
@@ -55,7 +59,6 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -64,43 +67,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
-//kreirame glaven Hr ovde
-async Task SeedRolesAndUsers(IServiceProvider serviceProvider)
-{
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    string[] roleNames = { "HR", "User " }; 
-    IdentityResult roleResult;
-
-    foreach (var roleName in roleNames)
-    {
-        var roleExist = await roleManager.RoleExistsAsync(roleName);
-        if (!roleExist)
-        {
-         
-            roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
-        }
-    }
-
-    // ovde se kreira prvio user Hr so mozi da praj se 
-    var Glaven = new ApplicationUser
-    {
-        UserName = "hr@example.com",
-        Email = "hr@example.com",
-        // Set other properties as needed
-    };
-
-    string userPassword = "Password123!"; //passo
-    var user = await userManager.FindByEmailAsync(Glaven.Email);
-
-    if (user == null)
-    {
-        var createPowerUser = await userManager.CreateAsync(Glaven, userPassword);
-        if (createPowerUser.Succeeded)
-        {
-            await userManager.AddToRoleAsync(Glaven, "HR");
-        }
-    }
-}

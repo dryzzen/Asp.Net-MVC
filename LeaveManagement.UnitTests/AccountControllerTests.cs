@@ -190,9 +190,13 @@ namespace LeaveManagement.UnitTests
 
             _mockUserManager.Setup(x => x.FindByEmailAsync(model.Email))
                 .ReturnsAsync(user);
-            _mockUserManager.Setup(x => x.RemovePasswordAsync(user))
-                .ReturnsAsync(IdentityResult.Success);
-            _mockUserManager.Setup(x => x.AddPasswordAsync(user, model.NewPassword))
+
+            // Mock the token generation
+            _mockUserManager.Setup(x => x.GeneratePasswordResetTokenAsync(user))
+                .ReturnsAsync("generated-token");
+
+            // Mock the password reset
+            _mockUserManager.Setup(x => x.ResetPasswordAsync(user, It.IsAny<string>(), model.NewPassword))
                 .ReturnsAsync(IdentityResult.Success);
 
             // Act

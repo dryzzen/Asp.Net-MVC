@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using LeaveManagement.Models;
 
 namespace LeaveManagement.ViewModels
 {
@@ -8,7 +9,7 @@ namespace LeaveManagement.ViewModels
     {
         [Required]
         [Display(Name = "Leave Type")]
-        public string LeaveType { get; set; }
+        public  LeaveType LeaveType{ get; set; }
 
         [Required]
         [DataType(DataType.Date)]
