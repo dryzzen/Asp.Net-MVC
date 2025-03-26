@@ -55,10 +55,7 @@ public class AccountController : Controller
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Profile", "Account");
             }
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
+            AddIdentityErrors(result);
         }
         return View(model);
     }
@@ -137,20 +134,16 @@ public class AccountController : Controller
             {
                 return RedirectToAction("ResetPasswordConfirmation");
             }
+            //i will use this because what i had previously was RemovePassword and then AddPassword
+            //because of the risk of leaving the user without a password we use a security token.
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
 
-            var result = await _userManager.RemovePasswordAsync(user);
             if (result.Succeeded)
             {
-                result = await _userManager.AddPasswordAsync(user, model.NewPassword);
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("ResetPasswordConfirmation");
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                return RedirectToAction("ResetPasswordConfirmation");
             }
+            AddIdentityErrors(result); // Using the helper method from earlier
         }
         return View(model);
     }
@@ -219,12 +212,18 @@ public class AccountController : Controller
             {
                 return RedirectToAction("Profile"); 
             }
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
+            AddIdentityErrors(result);
         }
 
         return View(model);
+    }
+
+
+    private void AddIdentityErrors(IdentityResult result)
+    {
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
     }
 }
