@@ -8,6 +8,7 @@ using LeaveTracker.Data;
 using LeaveTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 
+
 public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
