@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Welcome to LeaveTrack";
+}
+
+<link rel="stylesheet" href="~/css/homeController.css" asp-append-version="true" />
+
+<div class="welcome-container">
+    <h1 class="welcome-title">
+        Welcome to <span class="fun-element">LeaveTracker</span> 🎉
+    </h1>
+    <p class="welcome-subtitle">
+        Your one-stop solution for managing leave requests with ease and efficiency
+    </p>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <a asp-controller="LeaveRequest" asp-action="Index" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-in-right"></i> Go to Your Dashboard
+        </a>
+    }
+    else
+    {
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-person-plus"></i> Register
+            </a>
+        </div>
+    }
+</div>
+
+<div class="features-container">
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="bi bi-calendar-check"></i>
+        </div>
+        <h3 class="feature-title">Easy Request Management</h3>
+        <p class="feature-description">
+            Submit and track your leave requests with just a few clicks. No more paperwork!
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="bi bi-graph-up"></i>
+        </div>
+        <h3 class="feature-title">Real-time Tracking</h3>
+        <p class="feature-description">
+            See your remaining leave days and request status in real-time.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="bi bi-shield-lock"></i>
+        </div>
+        <h3 class="feature-title">Secure & Private</h3>
+        <p class="feature-description">
+            Your data is protected with enterprise-grade security measures.
+        </p>
+    </div>
+</div>
+
+<div class="text-center mt-5">
+    <img src="~/images/office-team.svg" alt="Team illustration" style="max-width: 500px; width: 100%;" class="fun-element">
+</div>

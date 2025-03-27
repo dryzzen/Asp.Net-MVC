@@ -1,0 +1,142 @@
+﻿@model IEnumerable<LeaveTracker.Models.LeaveRequest>
+
+<link rel="stylesheet" href="~/css/myLeaveRequestsStyle.css" asp-append-version="true" />
+
+<div class="leave-requests-container" id="mainContent">
+    <div class="leave-requests-header">
+        <h2><i class="bi bi-calendar-check"></i> Your Leave Requests</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Request
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table leave-requests-table">
+            <!-- Table content remains the same -->
+            <thead>
+                <tr>
+                    <th>Leave Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Days</th>
+                    <th>Comments</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (request.LeaveType == LeaveType.Annual)
+                            {
+                                <span class="badge bg-primary">Annual</span>
+                            }
+                            else if (request.LeaveType == LeaveType.Bonus)
+                            {
+                                <span class="badge bg-warning text-dark">Bonus</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Sick</span>
+                            }
+                        </td>
+                        <td>@request.StartDate.ToString("dd MMM yyyy")</td>
+                        <td>@request.EndDate.ToString("dd MMM yyyy")</td>
+                        <td>@((request.EndDate - request.StartDate).Days + 1)</td>
+                        <td>@(string.IsNullOrEmpty(request.Comments) ? "-" : request.Comments)</td>
+                        <td>
+                            @if (request.Status == LeaveStatus.Pending)
+                            {
+                                <span class="status-badge status-pending">Pending</span>
+                            }
+                            else if (request.Status == LeaveStatus.Approved)
+                            {
+                                <span class="status-badge status-approved">Approved</span>
+                            }
+                            else if (request.Status == LeaveStatus.Rejected)
+                            {
+                                <span class="status-badge status-rejected">Rejected</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Calendar Sidebar -->
+<div class="calendar-sidebar" id="calendarSidebar">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4><i class="bi bi-calendar3"></i> Leave Calendar</h4>
+        <button class="btn btn-sm btn-outline-secondary" id="closeCalendar">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div id="calendar"></div>
+</div>
+
+<!-- Floating Action Buttons -->
+<div class="floating-buttons">
+    <a asp-controller="Account" asp-action="Profile" class="btn btn-back">
+        <i class="bi bi-arrow-left"></i> Back to Profile
+    </a>
+    <button class="btn btn-calendar" id="calendarToggle">
+        <i class="bi bi-calendar3"></i>
+    </button>
+</div>
+
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize calendar
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: [
+        @foreach (var request in Model.Where(r => r.Status == LeaveStatus.Approved))
+        {
+            var color = request.LeaveType == LeaveType.Sick ? "#dc3545" :
+                      request.LeaveType == LeaveType.Annual ? "#0d6efd" : "#fd7e14";
+            <text>{
+                                title: '@request.LeaveType.ToString() Leave',
+                                start: '@request.StartDate.ToString("yyyy-MM-dd")',
+                                end: '@request.EndDate.AddDays(1).ToString("yyyy-MM-dd")',
+                                color: '@color',
+                                allDay: true
+                            },</text>
+        }
+                ],
+                eventDidMount: function(info) {
+                    $(info.el).tooltip({
+                        title: info.event.title +
+                               '\nStart: ' + info.event.start.toLocaleDateString() +
+                               '\nEnd: ' + info.event.end.toLocaleDateString(),
+                        placement: 'top',
+                        trigger: 'hover',
+                        container: 'body'
+                    });
+                }
+            });
+            calendar.render();
+
+            // Toggle calendar sidebar
+            $('#calendarToggle').click(function() {
+                $('#calendarSidebar').toggleClass('open');
+            });
+
+            $('#closeCalendar').click(function() {
+                $('#calendarSidebar').removeClass('open');
+            });
+        });
+    </script>
+}
