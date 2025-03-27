@@ -47,17 +47,19 @@
                     </form>
 
                     <!-- Action Buttons for Userlist , back , manage my leave requests     -->
+                    
                     <div class="mt-4 d-grid gap-2">
                         <a class="btn btn-primary" asp-controller="LeaveRequest" asp-action="Index">
                             <i class="bi bi-calendar-check"></i> My Leave Requests
                         </a>
 
-                       
+                        @if (User.IsInRole("HR"))
+                        {
                        
                        <a class="btn btn-primary"  asp-controller="HR" asp-action="UserList">
                             <i class="bi bi-people"></i> UserList
                        </a>
-
+                        }
                         <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">
                             <i class="bi bi-arrow-left-circle"></i> Back to Dashboard
                         </a>

@@ -8,7 +8,6 @@ using LeaveTracker.Data;
 using LeaveTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 
-
 public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -50,7 +49,7 @@ public class AccountController : Controller
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                //avtomatski neka e user 
+                //on lgoin he is automaticly a user role
                 await _userManager.AddToRoleAsync(user, "User"); // USer e Employee cuz i dumb
 
                 await _signInManager.SignInAsync(user, isPersistent: false);

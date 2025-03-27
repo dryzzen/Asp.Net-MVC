@@ -54,9 +54,14 @@
                             </li>
                         }
                     </ul>
-                    <div class="d-flex">
+                    <div class="d-flex align-items-center gap-2">
                         @if (User.Identity.IsAuthenticated)
                         {
+                            <div>
+                                <span class="text-light">Welcome, @User.Identity.Name!</span>
+                            </div>
+
+
                             <form asp-controller="Account" asp-action="Logout" method="post">
                                 <button type="submit" class="btn btn-outline-light">
                                     <i class="bi bi-box-arrow-right"></i> Logout
