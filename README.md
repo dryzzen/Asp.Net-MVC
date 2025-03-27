@@ -5,7 +5,9 @@ A modern **ASP.NET MVC** leave management system that handles employee leave req
 ## ✨ Key Features
 
 ### 🔐 Login/Register  
-*(Insert screenshot here)*  
+![Login Screen](./Images/LoginForm.jpg)
+![Register Screen](./Images/RegisterForm.jpg)
+
 - **Allows employees** to register and log in securely  
 - **Role-based access** (HR vs Regular Users)  
 - **Password recovery** support  
