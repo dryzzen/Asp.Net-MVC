@@ -50,5 +50,33 @@ A modern **ASP.NET MVC** leave management system that handles employee leave req
 
 ---
 
-## 🚀 Future Improvements  
-*(I'll provide these details later)*  
+🚀 Future Improvements
+High Priority
+💬 HR-Employee Chat System
+Real-time messaging for leave request clarifications
+
+📅 Enhanced Calendar Integration
+Interactive calendar with drag-and-drop leave planning
+
+📝 Rejection Comments
+Mandatory comments when HR rejects leave requests
+
+Medium Priority
+🐳 Docker Support
+Containerization for easier deployment
+
+📱 Mobile Responsiveness
+Optimize for phones/tablets
+
+📊 Analytics Dashboard
+Leave trend visualization (charts/graphs)
+
+Innovation Ideas
+🤖 Slack/MS Teams Integration
+Notify HR via workplace chat apps
+
+📅 Outlook/Google Calendar Sync
+Auto-add approved leaves to personal calendars
+
+🔍 Advanced Search
+Filter leave requests by team/department
