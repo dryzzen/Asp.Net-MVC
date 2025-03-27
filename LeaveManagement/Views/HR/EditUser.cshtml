@@ -1,68 +1,110 @@
 ﻿@model LeaveManagement.ViewModels.EditUserViewModel
 
-<h2>Edit User</h2>
+<link rel="stylesheet" href="~/css/editAndRegisterUserStyle.css" asp-append-version="true" />
 
-<form asp-action="EditUser" method="post">
-    <input type="hidden" name="id" value="@Model.Id" />
-
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+<div class="user-form-container">
+    <div class="user-form-header">
+        <h2><i class="bi bi-person-gear"></i> Edit Employee</h2>
     </div>
 
-    <div class="form-group">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
+    <div class="user-form-card">
+        <form asp-action="EditUser" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="DateOfBirth"></label>
+                        <input asp-for="DateOfBirth" type="date" class="form-control" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Position"></label>
+                        <input asp-for="Position" class="form-control" />
+                        <span asp-validation-for="Position" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="AnnualLeaveDays"></label>
+                        <input asp-for="AnnualLeaveDays" class="form-control" />
+                        <span asp-validation-for="AnnualLeaveDays" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="BonusLeaveDays"></label>
+                        <input asp-for="BonusLeaveDays" class="form-control" />
+                        <span asp-validation-for="BonusLeaveDays" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Current Role</label>
+                <p class="form-control-static">@Model.Role</p>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Role">Change Role</label>
+                <div class="role-options">
+                    <div class="role-option">
+                        <input type="radio" asp-for="Role" id="roleUser" value="User" checked="@(Model.Role == "User")">
+                        <label for="roleUser">User</label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" asp-for="Role" id="roleHR" value="HR" checked="@(Model.Role == "HR")">
+                        <label for="roleHR">HR</label>
+                    </div>
+                </div>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <a asp-action="UserList" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="form-group">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="DateOfBirth"></label>
-        <input asp-for="DateOfBirth" class="form-control" type="date" />
-        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Position"></label>
-        <input asp-for="Position" class="form-control" />
-        <span asp-validation-for="Position" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="AnnualLeaveDays">Annual Leave Days</label>
-        <input type="number" id="AnnualLeaveDays" name="AnnualLeaveDays" class="form-control" value="@Model.AnnualLeaveDays" />
-    </div>
-
-    <div class="form-group">
-        <label for="BonusLeaveDays">Bonus Leave Days</label>
-        <input type="number" id="BonusLeaveDays" name="BonusLeaveDays" class="form-control" value="@Model.BonusLeaveDays" />
-    </div>
-    
-
-     <div class="form-group">
-        <label>Current Role:</label>
-        <p class="form-control-static">@Model.Role</p>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Role">Pick Role:</label>
-        <select asp-for="Role" class="form-control">
-            <option value="">-- Select Role --</option>
-            <option value="User">User </option>
-            <option value="HR">HR</option>
-        </select>
-        <span asp-validation-for="Role" class="text-danger"></span>
-    </div>
-
-
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-</form>
-
-<a asp-action="UserList" class="btn btn-secondary">Back to User List</a>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

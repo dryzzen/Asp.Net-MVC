@@ -1,164 +1,305 @@
 ﻿@model IEnumerable<LeaveManagement.Models.LeaveRequest>
 
-<h2>Leave Requests</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/leaveManagementDashboardStyle.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+}
 
-<form asp-controller="LeaveRequest" asp-action="Search" method="get" class="mb-3">
-    <div class="input-group">
-        <input type="text" name="query" class="form-control" placeholder="Enter employee name" />
-        <select name="status" class="form-control">
-            <option value="">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
-        </select>
-        <select name="leaveType" class="form-control">
-            <option value="">All Leave Types</option>
-            <option value="Sick">Sick Leave</option>
-            <option value="Annual">Annual Leave</option>
-            <option value="Bonus">Bonus Leave</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Search</button>
+
+
+
+
+<div class="dashboard-container">
+    <div class="calendar-sidebar">
+        <div class="calendar-header">
+            <h5><i class="bi bi-calendar3"></i> Leave Calendar</h5>
+        </div>
+        <div id="calendar"></div>
     </div>
-</form>
-<div class="row">
-    <div class="col-md-8">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Submitter</th>
-                    <th>Leave Type</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Status</th>
-                    <th>Comments</th>
-                    <th>Medical Report</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var request in Model)
-                {
+
+    <button class="calendar-toggle" id="calendarToggle">
+        <i class="bi bi-calendar3"></i>
+    </button>
+
+    <div class="back-button-container">
+        <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Profile
+        </a>
+    </div>
+
+    <div class="dashboard-header">
+        <h2><i class="bi bi-clipboard2-pulse"></i> Leave Management Dashboard</h2>
+    </div>
+
+    <div class="search-panel mb-4">
+        <form asp-controller="LeaveRequest" asp-action="Search" method="get">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="query" class="form-control" placeholder="Employee name" />
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="leaveType" class="form-select">
+                        <option value="">All Leave Types</option>
+                        <option value="Sick">Sick Leave</option>
+                        <option value="Annual">Annual Leave</option>
+                        <option value="Bonus">Bonus Leave</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+
+    <div class="dashboard-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <td>@(request.SubmittedBy != null ? request.SubmittedBy.UserName : "N/A")</td>
-                        <td>@request.LeaveType</td>
-                        <td>@request.StartDate.ToShortDateString()</td>
-                        <td>@request.EndDate.ToShortDateString()</td>
-                        <td>
-                            @if (request.Status == LeaveStatus.Pending)
-                            {
-                                <span class="btn btn-secondary btn-sm">Pending</span>
-                            }
-                            else if (request.Status == LeaveStatus.Approved)
-                            {
-                                <span class="btn btn-success btn-sm">Approved</span>
-                            }
-                            else if (request.Status == LeaveStatus.Rejected)
-                            {
-                                <span class="btn btn-danger btn-sm">Rejected</span>
-                            }
-                            else
-                            {
-                                <span class="btn btn-light btn-sm">N/A</span>
-                            }
-                        </td>
-                        <td>@request.Comments</td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(request.MedicalReportPath))
-                            {
-                                <a href="@Url.Content("~/uploads/" + request.MedicalReportPath)" target="_blank">View Report</a>
-                            }
-                            else
-                            {
-                                <span>N/A</span>
-                            }
-                        </td>
-                        <td>
-                            @if (User.IsInRole("HR"))
-                            {
-                                if (request.Status == LeaveStatus.Pending)
-                                {
-                                    <div class="btn-group" role="group">
-                                        <form asp-action="Approve" method="post" style="display:inline;">
-                                            <input type="hidden" name="id" value="@request.Id" />
-                                            <button type="submit" class="btn btn-success">Approve</button>
-                                        </form>
-                                        <form asp-action="Reject" method="post" style="display:inline;">
-                                            <input type="hidden" name="id" value="@request.Id" />
-                                            <button type="submit" class="btn btn-danger">Reject</button>
-                                        </form>
-                                    </div>
-                                }
-                                <form asp-controller="HR" asp-action="DeleteLeaveRequest" method="post" style="display:inline;">
-                                    <input type="hidden" name="id" value="@request.Id" />
-                                    <button type="submit" class="btn btn-warning">Delete</button>
-                                </form>
-                            }
-                            else
-                            {
-                                <span class="text-muted">N/A</span>
-                            }
-                        </td>
+                        <th>Employee</th>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Days</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-        <a class="btn btn-secondary" asp-controller="Account" asp-action="Profile">Back</a>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="employee-info">
+                                    <div class="employee-name">@(request.SubmittedBy?.UserName ?? "N/A")</div>
+                                    <small class="text-muted">@request.SubmittedBy?.Email</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge leave-type @request.LeaveType.ToString().ToLower()">
+                                    @request.LeaveType.ToString()
+                                </span>
+                            </td>
+                            <td>@request.StartDate.ToShortDateString()</td>
+                            <td>@request.EndDate.ToShortDateString()</td>
+                            <td>@((request.EndDate - request.StartDate).Days + 1)</td>
+                            <td>
+                                @if (request.Status == LeaveStatus.Pending)
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                                else if (request.Status == LeaveStatus.Approved)
+                                {
+                                    <span class="badge bg-success">Approved</span>
+                                }
+                                else if (request.Status == LeaveStatus.Rejected)
+                                {
+                                    <span class="badge bg-danger">Rejected</span>
+                                }
+                            </td>
+                      
 
-    <div class="col-md-4">
-        <div id="calendar" style="margin-left: 20px;"></div> <!-- Added margin to the left -->
+                            <td><!--For Details , also this will appear top left-->
+                                <div class="action-buttons">
+                                    <button class="btn btn-view btn-sm mb-1" data-bs-toggle="modal"
+                                            data-bs-target="#detailsModal-@request.Id"
+                                            title="View Details">
+                                        <i class="bi bi-eye-fill"></i> View
+                                    </button>
+
+                                    @if (request.Status == LeaveStatus.Pending)
+                                    {
+                                        <!-- First approving req, also this will appear middle left -->
+                                        <div class="d-flex gap-1 mb-1">
+                                            <form asp-action="Approve" asp-route-id="@request.Id" method="post" class="flex-grow-1">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-approve btn-sm w-100"
+                                                        title="Approve Request"
+                                                        onclick="return confirm('Are you sure you want to APPROVE this leave request?')">
+                                                    <i class="bi bi-check-circle-fill"></i> Approve
+                                                </button>
+                                            </form>
+
+
+                                            <!-- For rejecting the req, this will appear middle  right -->
+                                               <form asp-action="Reject" asp-route-id="@request.Id" method="post" class="flex-grow-1">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-reject btn-sm w-100"
+                                                    title="Reject Request"
+                                                    onclick="return confirm('Are you sure you want to REJECT this leave request?')">
+                                                <i class="bi bi-x-circle-fill"></i> Reject
+                                            </button>
+                                        </form>
+                                        </div>
+                                    }
+
+                                    <!-- For Deleting the req, also this will appear bottom left -->
+                                    <form asp-action="DeleteLeaveRequest" asp-route-id="@request.Id" method="post" class="w-100">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-delete btn-sm w-100"
+                                                title="Delete Request"
+                                                onclick="return confirm('WARNING: This will permanently delete the request. Continue?')">
+                                            <i class="bi bi-trash-fill"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                                <div class="modal fade" id="detailsModal-@request.Id" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Leave Request Details</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <strong>Employee:</strong>
+                                                        <p>@(request.SubmittedBy?.UserName ?? "N/A")</p>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <strong>Leave Type:</strong>
+                                                        <p>@request.LeaveType.ToString()</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <strong>Start Date:</strong>
+                                                        <p>@request.StartDate.ToShortDateString()</p>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <strong>End Date:</strong>
+                                                        <p>@request.EndDate.ToShortDateString()</p>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <strong>Comments:</strong>
+                                                    <p>@(string.IsNullOrEmpty(request.Comments) ? "None" : request.Comments)</p>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(request.MedicalReportPath))
+                                                {
+                                                    <div class="mb-3">
+                                                        <strong>Medical Report:</strong>
+                                                        <a href="@Url.Content("~/uploads/" + request.MedicalReportPath)"
+                                                           target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bi bi-file-earmark-medical"></i> View Report
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<!-- Include FullCalendar CSS -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
-
-<!-- Include FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-
-<!-- Include Popper.js for tooltips -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
-
-<!-- Include Tooltip.js for tooltips -->
-<script src="https://cdn.jsdelivr.net/npm/tooltip.js/dist/tooltip.min.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: [
-                @foreach (var request in Model)
-                {
-        if (request.Status == LeaveStatus.Approved) // Only show approved requests
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calendar initialization
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                events: [
+        @foreach (var request in Model)
         {
-            for (var date = request.StartDate; date <= request.EndDate; date = date.AddDays(1))
+            if (request.Status == LeaveStatus.Approved)
             {
+                var color = request.LeaveType == LeaveType.Sick ? "#dc3545" :
+                          request.LeaveType == LeaveType.Annual ? "#0d6efd" : "#fd7e14";
                 <text>{
-                         title: '@request.SubmittedBy.Email',
-                         start: '@date.ToString("yyyy-MM-dd")',
-                         end: '@date.AddDays(1).ToString("yyyy-MM-dd")',
-                         color: 'red' // Mark the days in red
-                 },</text>
+                                        title: '@request.SubmittedBy?.UserName',
+                                        start: '@request.StartDate.ToString("yyyy-MM-dd")',
+                                        end: '@request.EndDate.AddDays(1).ToString("yyyy-MM-dd")',
+                                        color: '@color',
+                                        extendedProps: {
+                                            type: '@request.LeaveType.ToString()',
+                                            employee: '@request.SubmittedBy?.UserName'
+                                        }
+                                    },</text>
             }
         }
-    }
-            ],
-            eventMouseEnter: function(info) {
-                var tooltip = new Tooltip(info.event.el, {
-                    title: info.event.title,
-                    placement: 'top',
-                    trigger: 'hover',
-                    container: 'body'
-                });
-                tooltip.show();
-            },
-            eventMouseLeave: function(info) {
-                // Hide the tooltip when the mouse leaves the event
-                Tooltip.hide();
-            }
-        });
+                ],
+                eventDidMount: function(info) {
+                    $(info.el).tooltip({
+                        title: `${info.event.extendedProps.employee} - ${info.event.extendedProps.type} Leave`,
+                        placement: 'top',
+                        trigger: 'hover',
+                        container: 'body'
+                    });
+                }
+            });
+            calendar.render();
 
-        calendar.render();
-    });
-</script>
+            // Calendar toggle functionality
+            const calendarToggle = document.getElementById('calendarToggle');
+            const calendarSidebar = document.querySelector('.calendar-sidebar');
+
+            calendarToggle.addEventListener('click', function() {
+                calendarSidebar.classList.toggle('open');
+                this.classList.toggle('open');
+
+                const icon = this.querySelector('i');
+                if (calendarSidebar.classList.contains('open')) {
+                    icon.classList.replace('bi-calendar3', 'bi-x');
+                } else {
+                    icon.classList.replace('bi-x', 'bi-calendar3');
+                }
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!calendarSidebar.contains(e.target) &&
+                    e.target !== calendarToggle &&
+                    !calendarToggle.contains(e.target)) {
+                    calendarSidebar.classList.remove('open');
+                    calendarToggle.classList.remove('open');
+                    calendarToggle.querySelector('i').classList.replace('bi-x', 'bi-calendar3');
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,120 @@
+﻿:root {
+ --auth-primary: #4e73df;
+      --auth-primary-dark: #2e59d9;
+    --auth-light: #f8f9fc;
+}
+
+.auth-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.auth-card {
+     width: 100%;
+ max-width: 450px;
+    margin: auto;
+     padding: 2.5rem;
+    border-radius: 0.5rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    background: white;
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+    .auth-logo i {
+        font-size: 2.5rem;
+        color: var(--auth-primary);
+    }
+
+.auth-title {
+      font-size: 1.75rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    color: var(--auth-primary);
+  font-weight: 600;
+}
+
+.auth-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.auth-form label {
+    font-weight: 500;
+    color: #5a5c69;
+}
+
+.auth-form .form-control {
+    padding: 0.75rem 1rem;
+     border-radius: 0.35rem;
+    border: 1px solid #d1d3e2;
+}
+
+.auth-form .form-control:focus {
+      border-color: var(--auth-primary);
+   box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+.auth-btn {
+    width: 100%;
+       padding: 0.75rem;
+    font-weight: 600;
+      background-color: var(--auth-primary);
+    border: none;
+     border-radius: 0.35rem;
+    transition: all 0.3s;
+}
+
+.auth-btn:hover {
+        background-color: var(--auth-primary-dark);
+    }
+
+.auth-links {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.auth-link {
+    color: var(--auth-primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-link:hover {
+        color: var(--auth-primary-dark);
+        text-decoration: underline;
+    }
+
+@media (max-width: 576px) {
+     .auth-card {
+        padding: 2rem 1.5rem;
+           box-shadow: none;
+        border-radius: 0;
+    }
+}
+
+.confirmation-message {
+      background-color: #f8f9fa;
+     order-radius: 0.5rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+.confirmation-message .lead {
+ font-size: 1.25rem;
+        font-weight: 500;
+        color: #2e59d9;
+    }
+
+.floating-buttons {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 1000;
+}

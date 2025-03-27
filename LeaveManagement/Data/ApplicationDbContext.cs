@@ -16,7 +16,6 @@ namespace LeaveManagement.Data
         {
             base.OnModelCreating(builder);
 
-            //this is to configure the relationship between the User and LeaveRequest 1->many
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.LeaveRequests)
                 .WithOne(lr => lr.SubmittedBy)

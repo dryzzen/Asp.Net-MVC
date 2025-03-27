@@ -97,7 +97,7 @@ public class AccountController : Controller
         return View();
     }
     
-    //da se zapise ovde mail za da se vidi dali usero postoj, ako postoj mu go prakame na ResetPassword
+    //It takes the mail and sends us to ResetPassword
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
@@ -123,7 +123,7 @@ public class AccountController : Controller
         return View(model);
     }
 
-    //da vnesi nov passsowrd so confirm, a email e avtomatcki prefrlen od ForgotPassoword viewmodelo
+    //It takes the mail from the forgot password and here we cannot chnage it 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
@@ -144,19 +144,19 @@ public class AccountController : Controller
             {
                 return RedirectToAction("ResetPasswordConfirmation");
             }
-            AddIdentityErrors(result); // Using the helper method from earlier
+            AddIdentityErrors(result); // Using helper because there were 1.8k lines of the exact code , and im not kidding :)
         }
         return View(model);
     }
 
-    //otkako ke go meni da bidi ispraten ovde i da ima opcija da se logira so novio password preku dugme 
+    
     public IActionResult ResetPasswordConfirmation()
     {
         return View();
     }
 
     
-    //informaciite sto gi vnesva usero od Register , da se prefrlat ovde
+    //User info , and leave info
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
@@ -187,7 +187,7 @@ public class AccountController : Controller
     }
 
 
-    //vo slucaj da saka usero da promeni nesto na ProfilePage , da se updatni i saveni
+    //for udpating the profile 
     [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]

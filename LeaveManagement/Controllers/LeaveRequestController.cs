@@ -31,7 +31,7 @@ namespace LeaveManagement.Controllers
             _fileUploadService = fileUploadService;
         }
 
-        //za prikaz na site leave requestoj na usero
+        //For all requests to pop up when the user goes here
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -43,9 +43,21 @@ namespace LeaveManagement.Controllers
             return View(leaveRequests);
         }
 
-        public IActionResult Create()
+        [HttpGet]
+        public IActionResult Create(LeaveType? leaveType = null)
         {
-            return View();
+            var model = new LeaveRequestViewModel
+            {
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddDays(1)
+            };
+
+            if (leaveType.HasValue && (leaveType.Value == LeaveType.Annual || leaveType.Value == LeaveType.Bonus))
+            {
+                model.LeaveType = leaveType.Value;
+            }
+
+            return View(model);
         }
 
         [HttpPost]
@@ -60,32 +72,10 @@ namespace LeaveManagement.Controllers
             var user = await _userManager.GetUserAsync(User);
             int requestedDays = (model.EndDate - model.StartDate).Days + 1;
 
+            // Validate dates
             if (model.StartDate < DateTime.Today)
             {
                 ModelState.AddModelError("", "You cannot submit a leave request for a date before today.");
-                return View(model);
-            }
-
-            var existingRequest = await _context.LeaveRequests
-                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Pending) // Changed to enum
-                .FirstOrDefaultAsync();
-
-            if (existingRequest != null)
-            {
-                ModelState.AddModelError("", "You already have a pending leave request. Please wait for it to be approved or rejected before submitting a new one.");
-                return View(model);
-            }
-
-            var overlappingRequests = await _context.LeaveRequests
-            .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Approved && // Changed to enum
-                  ((model.StartDate >= lr.StartDate && model.StartDate <= lr.EndDate) ||
-                   (model.EndDate >= lr.StartDate && model.EndDate <= lr.EndDate) ||
-                   (model.StartDate <= lr.StartDate && model.EndDate >= lr.EndDate)))
-             .ToListAsync();
-
-            if (overlappingRequests.Any())
-            {
-                ModelState.AddModelError("", "You cannot submit a leave request that overlaps with an existing approved leave request.");
                 return View(model);
             }
 
@@ -95,11 +85,38 @@ namespace LeaveManagement.Controllers
                 return View(model);
             }
 
-            if (model.LeaveType == LeaveType.Annual && requestedDays > await _leaveService.GetRemainingAnnualLeave(user.Id)) // Changed to enum
+            // Cannot issue a req if the previous one hasnt been approved or rejected
+            var existingRequest = await _context.LeaveRequests
+                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Pending)
+                .FirstOrDefaultAsync();
+
+            if (existingRequest != null)
+            {
+                ModelState.AddModelError("", "You already have a pending leave request. Please wait for it to be approved or rejected before submitting a new one.");
+                return View(model);
+            }
+
+            // Req cannot have a same day, for example 17-19, 19-28, 19 is not available
+            var overlappingRequests = await _context.LeaveRequests
+                .Where(lr => lr.UserId == user.Id &&
+                            lr.Status == LeaveStatus.Approved &&
+                            ((model.StartDate >= lr.StartDate && model.StartDate <= lr.EndDate) ||
+                             (model.EndDate >= lr.StartDate && model.EndDate <= lr.EndDate) ||
+                             (model.StartDate <= lr.StartDate && model.EndDate >= lr.EndDate)))
+                .ToListAsync();
+
+            if (overlappingRequests.Any())
+            {
+                ModelState.AddModelError("", "You cannot submit a leave request that overlaps with an existing approved leave request.");
+                return View(model);
+            }
+
+            //Calculate if they have days 
+            if (model.LeaveType == LeaveType.Annual && requestedDays > await _leaveService.GetRemainingAnnualLeave(user.Id))
             {
                 ModelState.AddModelError("", "You do not have enough annual leave days.");
             }
-            else if (model.LeaveType == LeaveType.Bonus && requestedDays > await _leaveService.GetRemainingBonusLeave(user.Id)) // Changed to enum
+            else if (model.LeaveType == LeaveType.Bonus && requestedDays > await _leaveService.GetRemainingBonusLeave(user.Id))
             {
                 ModelState.AddModelError("", "You do not have enough bonus leave days.");
             }
@@ -109,19 +126,21 @@ namespace LeaveManagement.Controllers
                 return View(model);
             }
 
+            // Create and save the leave request
             var leaveRequest = new LeaveRequest
             {
                 UserId = user.Id,
-                LeaveType = model.LeaveType, // Now using enum
+                LeaveType = model.LeaveType,
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Comments = model.Comments,
                 SubmittedBy = user,
-                Status = LeaveStatus.Pending, // Changed to enum
+                Status = LeaveStatus.Pending,
             };
 
             _context.LeaveRequests.Add(leaveRequest);
             await _context.SaveChangesAsync();
+
             return RedirectToAction("Index");
         }
         public IActionResult CreateSickLeave()
@@ -130,7 +149,7 @@ namespace LeaveManagement.Controllers
         }
 
 
-        //ti treba ova bidejki MedicalReportPath iako e nullable pak go bara za annual i za bonus days , vaka si ima seperate method.
+        //Dont get me started , if someone asks MedicalReport Nullable did not work so seperate EVERYTHING was created :) ty
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateSickLeave(SickLeaveRequestViewModel model)
@@ -150,7 +169,7 @@ namespace LeaveManagement.Controllers
             }
 
             var overlappingRequests = await _context.LeaveRequests
-                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Approved && // Changed to enum
+                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Approved && 
                       ((model.StartDate >= lr.StartDate && model.StartDate <= lr.EndDate) ||
                        (model.EndDate >= lr.StartDate && model.EndDate <= lr.EndDate) ||
                        (model.StartDate <= lr.StartDate && model.EndDate >= lr.EndDate)))
@@ -169,7 +188,7 @@ namespace LeaveManagement.Controllers
             }
 
             var existingRequest = await _context.LeaveRequests
-                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Pending) // Changed to enum
+                .Where(lr => lr.UserId == user.Id && lr.Status == LeaveStatus.Pending) 
                 .FirstOrDefaultAsync();
 
             if (existingRequest != null)
@@ -187,12 +206,12 @@ namespace LeaveManagement.Controllers
             var leaveRequest = new LeaveRequest
             {
                 UserId = user.Id,
-                LeaveType = LeaveType.Sick, // Changed to enum
+                LeaveType = LeaveType.Sick, 
                 StartDate = model.StartDate,
                 EndDate = model.EndDate,
                 Comments = model.Comments,
                 SubmittedBy = user,
-                Status = LeaveStatus.Pending, // Changed to enum
+                Status = LeaveStatus.Pending, 
             };
 
             if (model.MedicalReport != null && model.MedicalReport.Length > 0)

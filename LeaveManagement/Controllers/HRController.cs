@@ -62,13 +62,17 @@ namespace LeaveManagement.Controllers
                 var result = await _userManager.UpdateAsync(user);
                 if (result.Succeeded)
                 {
+                    TempData["Success"] = "Leave request approved successfully";
+
                     await _context.SaveChangesAsync(); 
                 }
             }
             return RedirectToAction("Index");
         }
 
-
+        [Authorize(Roles = "HR")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int id)
         {
             var leaveRequest = await _context.LeaveRequests.FindAsync(id);
@@ -76,7 +80,7 @@ namespace LeaveManagement.Controllers
             {
                 return NotFound();
             }
-
+            TempData["Success"] = "Leave request rejected";
             leaveRequest.Status = LeaveStatus.Rejected;
             _context.LeaveRequests.Update(leaveRequest);
             await _context.SaveChangesAsync();
@@ -197,7 +201,7 @@ namespace LeaveManagement.Controllers
                 user.AnnualLeaveDays = model.AnnualLeaveDays;
                 user.BonusLeaveDays = model.BonusLeaveDays;
 
-                //ne go menvaj ova bidejki ti resetirat roles , vaka raboti
+                //dont change this 
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 await _userManager.AddToRoleAsync(user, model.Role);
@@ -227,8 +231,8 @@ namespace LeaveManagement.Controllers
                 return NotFound();
             }
 
-            //raboti ali poradi nekoja pricina "You cannot delete the HR user." ne izlegva. Vidi so e rabotata . Isto taka ako probame dad go delete usero ni se javuva error
-            if (user.Email == "hr@example.com")//duri ne napram vi view da ne izlegva delete za usero neka sedi tuka, Userlist.
+           //so i left this because idk let it stay here , but the delete option was removed from hr@example.com
+            if (user.Email == "hr@example.com")
             {
                 TempData["Error"] = "Cannot delete HR user.";
                 return RedirectToAction("UserList");
@@ -277,6 +281,7 @@ namespace LeaveManagement.Controllers
                 {
                     user.SickLeaveDays -= approvedDays; 
                 }
+
 
                 _context.LeaveRequests.Remove(leaveRequest);
                 await _userManager.UpdateAsync(user); 

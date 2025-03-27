@@ -1,0 +1,26 @@
+﻿.profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.profile-chart {
+    height: 380px;
+    margin: 2.5rem 0;
+    position: relative;
+}
+
+.profile-card {
+    border-radius: 0.6rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+    }
+
+.profile-form .form-control {
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.4rem;
+}

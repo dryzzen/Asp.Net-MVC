@@ -1,0 +1,148 @@
+﻿.search-results-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.search-results-header {
+    margin-bottom: 2rem;
+}
+
+    .search-results-header h2 {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+.search-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+    .search-results-table th {
+        background-color: #4e73df;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 500;
+    }
+
+    .search-results-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+
+    .search-results-table tr:hover {
+        background-color: #f8f9fa;
+    }
+
+.status-badge {
+    padding: 0.35rem 0.65rem;
+    border-radius: 50rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
+.status-pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-approved {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-rejected {
+    background-color: #dc3545;
+    color: white;
+}
+
+.leave-type-badge {
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.type-annual {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.type-bonus {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.type-sick {
+    background-color: #dc3545;
+    color: white;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+    .action-buttons .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.medical-report-link {
+    color: #4e73df;
+    font-weight: 500;
+}
+
+    .medical-report-link:hover {
+        text-decoration: underline;
+    }
+
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.back-button {
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .search-results-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .search-results-container {
+        padding: 1rem;
+    }
+
+    .search-results-table th,
+    .search-results-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+}
