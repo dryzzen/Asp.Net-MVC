@@ -51,6 +51,7 @@ A modern **ASP.NET MVC** leave management system that handles employee leave req
 ---
 
 🚀 Future Improvements
+
 High Priority
 💬 HR-Employee Chat System
 Real-time messaging for leave request clarifications
