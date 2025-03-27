@@ -15,8 +15,8 @@ A modern **ASP.NET MVC** leave management system that handles employee leave req
 ---
 
 ### 👤 User Profiles  
-*(Insert screenshot for Regular User Profile here)*  
-*(Insert screenshot for HR Profile here)*  
+![Login Screen](./Images/UserProfileForm.jpg)
+![Login Screen](./Images/HrProfileForm.jpg)
 - **For Regular Users**:  
   - View personal leave balance  
   - Update contact information  
@@ -27,8 +27,8 @@ A modern **ASP.NET MVC** leave management system that handles employee leave req
 ---
 
 ### 📊 HR Dashboard (Leave Management & User List)  
-*(Insert dashboard screenshot here)*  
-*(Insert user list screenshot here)*  
+![Login Screen](./Images/ViewAllUsersRequestsForm.jpg)
+![Login Screen](./Images/UserListForm.jpg)
 - **Real-time leave request monitoring**  
 - **Bulk approval/rejection** of requests  
 - **Employee search & filtering**  
@@ -37,8 +37,9 @@ A modern **ASP.NET MVC** leave management system that handles employee leave req
 ---
 
 ### 📝 Leave Requests  
-*(Insert My Leave Requests index screenshot here)*  
-*(Insert Create Request screenshot here)*  
+![Login Screen](./Images/ViewLeaveRequestsForm.jpg)
+![Login Screen](./Images/CreateRequestForm.jpg)
+
 - **For All Users**:  
   - Submit new leave requests (with attachments)  
   - View request history & status  
