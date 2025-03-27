@@ -2,6 +2,16 @@
 
 A modern **ASP.NET MVC** leave management system that handles employee leave requests, approvals, and HR oversight.
 
+🛠️ Technologies Used
+Category	Technologies
+Backend	ASP.NET MVC, Entity Framework, C#
+Frontend	Bootstrap 5, JavaScript, Razor Pages
+Database	SQL Server
+Auth	ASP.NET Identity with Role-Based Access Control
+DevOps	GitHub Actions (CI/CD)
+Testing	xUnit, Moq
+
+
 ## ✨ Key Features
 
 ### 🔐 Login/Register  
