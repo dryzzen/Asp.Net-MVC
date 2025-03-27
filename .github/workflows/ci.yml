@@ -10,6 +10,6 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: Build
-        run: dotnet build --configuration Release
+        run: dotnet build ./LeaveTracker/LeaveTracker.sln --configuration Release
       - name: Test
-        run: dotnet test --no-build --configuration Release
+        run: dotnet test ./LeaveTracker/LeaveTracker.sln --no-build --configuration Release
