@@ -67,7 +67,7 @@
                 $('#leaveTypeSelect').val(leaveType);
             }
 
-            // Handle switching to sick leave
+            // Handle switching to sick leave, it should work :) p.s damjan od idninata veli deka raboti to probaj da go menis poradi to so datite se resetirat ako odberis drug leavetype.
             $('#leaveTypeSelect').change(function() {
                 if ($(this).val() === '@LeaveType.Sick') {
                     window.location.href = '@Url.Action("CreateSickLeave", "LeaveRequest")';

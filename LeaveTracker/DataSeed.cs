@@ -10,11 +10,9 @@ namespace LeaveTracker
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-            // Create essential roles
             await EnsureRoleAsync(roleManager, "HR");
             await EnsureRoleAsync(roleManager, "User");
 
-            // Create protected HR account
             await EnsureHrAccountAsync(userManager);
         }
 
@@ -39,12 +37,12 @@ namespace LeaveTracker
                     EmailConfirmed = true,
                     FirstName = "HR",
                     LastName = "Admin",
-                    AnnualLeaveDays = 21, // Starting with standard allowance
+                    AnnualLeaveDays = 21, 
                     BonusLeaveDays = 0,
                     Position = "HR Manager"
                 };
 
-                const string hrPassword = "Password123!"; // Change in production!
+                const string hrPassword = "Password123!"; 
                 var result = await userManager.CreateAsync(hrUser, hrPassword);
 
                 if (result.Succeeded)

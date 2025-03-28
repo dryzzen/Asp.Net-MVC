@@ -26,28 +26,23 @@ namespace LeaveTracker.UnitTests
 
         public HRControllerTests()
         {
-            // Setup in-memory database
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _dbContext = new ApplicationDbContext(options);
 
-            // Mock UserManager
             var store = new Mock<IUserStore<ApplicationUser>>();
             _mockUserManager = new Mock<UserManager<ApplicationUser>>(
                 store.Object, null, null, null, null, null, null, null, null);
 
-            // Mock LeaveService
             _mockLeaveService = new Mock<ILeaveService>();
 
-            // Create controller with mock HR user
             _controller = new HRController(
                 _dbContext,
                 _mockUserManager.Object,
                 _mockLeaveService.Object);
 
-            // Mock HR user context
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "hr-user-1"),
@@ -85,10 +80,8 @@ namespace LeaveTracker.UnitTests
             _mockUserManager.Setup(x => x.GetRolesAsync(testUser))
                 .ReturnsAsync(new List<string> { "User" });
 
-            // Act - Calling the GET version with string ID
             var result = await _controller.EditUser("user-123");
 
-            // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<EditUserViewModel>(viewResult.Model);
 
@@ -101,11 +94,10 @@ namespace LeaveTracker.UnitTests
         [Fact]
         public async Task EditUser_POST_WithValidId_UpdatesUserAndRedirects()
         {
-            // Arrange
             var userId = "user-123";
             var viewModel = new EditUserViewModel
             {
-                Id = userId, // <-- Must match the `id` parameter
+                Id = userId,
                 Email = "updated@example.com",
                 FirstName = "Updated",
                 LastName = "User",
@@ -116,11 +108,9 @@ namespace LeaveTracker.UnitTests
                 Role = "HR"
             };
 
-            // Mock user retrieval
             _mockUserManager.Setup(x => x.FindByIdAsync(userId))
                 .ReturnsAsync(new ApplicationUser { Id = userId });
 
-            // Mock role updates
             _mockUserManager.Setup(x => x.GetRolesAsync(It.IsAny<ApplicationUser>()))
                 .ReturnsAsync(new List<string> { "User" });
             _mockUserManager.Setup(x => x.RemoveFromRolesAsync(It.IsAny<ApplicationUser>(), It.IsAny<IEnumerable<string>>()))
@@ -128,21 +118,16 @@ namespace LeaveTracker.UnitTests
             _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), "HR"))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Mock user update
             _mockUserManager.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Mock SaveChanges (since your controller calls _context.SaveChangesAsync())
             var mockDbContext = new Mock<ApplicationDbContext>();
             mockDbContext.Setup(x => x.SaveChangesAsync(default))
                 .ReturnsAsync(1);
-            // Ensure ModelState is valid (since the action checks ModelState.IsValid)
-            _controller.ModelState.Clear(); // Clears any existing errors
+            _controller.ModelState.Clear(); 
 
-            // Act - Call the POST version with BOTH parameters
-            var result = await _controller.EditUser(userId, viewModel); // <-- Now passing both `id` and `model`
+            var result = await _controller.EditUser(userId, viewModel); 
 
-            // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("UserList", redirectResult.ActionName);
         }
@@ -150,29 +135,23 @@ namespace LeaveTracker.UnitTests
         [Fact]
         public async Task EditUser_POST_WithInvalidId_ReturnsNotFound()
         {
-            // Arrange
             var invalidId = "invalid-user";
             _mockUserManager.Setup(x => x.FindByIdAsync(invalidId))
                 .ReturnsAsync((ApplicationUser)null);
 
-            // Act
             var result = await _controller.EditUser(invalidId);
 
-            // Assert
             Assert.IsType<NotFoundResult>(result);
         }
 
         [Fact]
         public async Task EditUser_GET_WithInvalidId_ReturnsNotFound()
         {
-            // Arrange
             _mockUserManager.Setup(x => x.FindByIdAsync("invalid-id"))
                 .ReturnsAsync((ApplicationUser)null);
 
-            // Act
             var result = await _controller.EditUser("invalid-id");
 
-            // Assert
             Assert.IsType<NotFoundResult>(result);
         }
     }

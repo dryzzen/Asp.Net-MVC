@@ -26,29 +26,25 @@ namespace LeaveTracker.UnitTests
 
         public AccountControllerTests()
         {
-            // Setup in-memory database
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _dbContext = new ApplicationDbContext(options);
 
-            // Mock UserManager
             var store = new Mock<IUserStore<ApplicationUser>>();
             _mockUserManager = new Mock<UserManager<ApplicationUser>>(
                 store.Object, null, null, null, null, null, null, null, null);
 
-            // Mock SignInManager
             _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
                 _mockUserManager.Object,
                 Mock.Of<IHttpContextAccessor>(),
                 Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
                 null, null, null, null);
 
-            // Mock LeaveService
+           
             _mockLeaveService = new Mock<ILeaveService>();
 
-            // Controller creating :(
             _controller = new AccountController(
                 _mockUserManager.Object,
                 _mockSignInManager.Object,
@@ -61,10 +57,9 @@ namespace LeaveTracker.UnitTests
             _dbContext.Dispose();
         }
 
-        [Fact]//If Register is GUD
+        [Fact]
         public async Task Register_ValidModel_RedirectsToProfile()
         {
-            // Arrange
             var model = new RegistrationViewModel
             {
                 Email = "test@example.com",
@@ -81,33 +76,27 @@ namespace LeaveTracker.UnitTests
             _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), "User"))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Act
             var result = await _controller.Register(model);
 
-            // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Profile", redirectResult.ActionName);
         }
 
-        [Fact]//If Register is BAD
+        [Fact]
         public async Task Register_InvalidModel_ReturnsViewWithModel()
         {
-            // Arrange
             var model = new RegistrationViewModel();
             _controller.ModelState.AddModelError("Email", "Required");
 
-            // Act
             var result = await _controller.Register(model);
 
-            // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.Equal(model, viewResult.Model);
         }
 
-        [Fact]//Login GUD
+        [Fact]
         public async Task Login_ValidCredentials_RedirectsToProfile()
         {
-            // Arrange
             var model = new LoginViewModel
             {
                 Email = "test@example.com",
@@ -119,18 +108,15 @@ namespace LeaveTracker.UnitTests
                 model.Email, model.Password, model.RememberMe, false))
                 .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
 
-            // Act
             var result = await _controller.Login(model);
 
-            // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Profile", redirectResult.ActionName);
         }
 
-        [Fact]//IF profile displays info
+        [Fact]
         public async Task Profile_AuthenticatedUser_ReturnsViewWithModel()
         {
-            // Arrange
             var user = new ApplicationUser
             {
                 Id = "1",
@@ -152,7 +138,6 @@ namespace LeaveTracker.UnitTests
             _mockLeaveService.Setup(x => x.GetSickDaysTaken(user.Id))
                 .ReturnsAsync(3);
 
-            // Mock user context
             var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, user.Id) };
             var identity = new ClaimsIdentity(claims, "TestAuthType");
             var claimsPrincipal = new ClaimsPrincipal(identity);
@@ -161,10 +146,8 @@ namespace LeaveTracker.UnitTests
                 HttpContext = new DefaultHttpContext { User = claimsPrincipal }
             };
 
-            // Act
             var result = await _controller.Profile();
 
-            // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<ProfileViewModel>(viewResult.Model);
 
@@ -178,7 +161,6 @@ namespace LeaveTracker.UnitTests
         [Fact]
         public async Task ResetPassword_ValidModel_RedirectsToConfirmation()
         {
-            // Arrange
             var model = new ResetPasswordViewModel
             {
                 Email = "test@example.com",
@@ -191,33 +173,27 @@ namespace LeaveTracker.UnitTests
             _mockUserManager.Setup(x => x.FindByEmailAsync(model.Email))
                 .ReturnsAsync(user);
 
-            // Mock the token generation
             _mockUserManager.Setup(x => x.GeneratePasswordResetTokenAsync(user))
                 .ReturnsAsync("generated-token");
 
-            // Mock the password reset
             _mockUserManager.Setup(x => x.ResetPasswordAsync(user, It.IsAny<string>(), model.NewPassword))
                 .ReturnsAsync(IdentityResult.Success);
 
-            // Act
+            
             var result = await _controller.ResetPassword(model);
 
-            // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("ResetPasswordConfirmation", redirectResult.ActionName);
         }
 
-        [Fact]//logout->HomeCotnrollerIndex
+        [Fact]
         public async Task Logout_Always_RedirectsToHomeIndex()
         {
-            // Arrange
             _mockSignInManager.Setup(x => x.SignOutAsync())
                 .Returns(Task.CompletedTask);
 
-            // Act
             var result = await _controller.Logout();
 
-            // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("Home", redirectResult.ControllerName);

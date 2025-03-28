@@ -119,7 +119,6 @@ public class LeaveService : ILeaveService
             return 0; // User not found
         }
 
-        // Calculate remaining bonus leave days
         var leaveRequests = await _context.LeaveRequests
             .Where(lr => lr.UserId == userId && lr.LeaveType == LeaveType.Bonus && lr.Status == LeaveStatus.Approved)
             .ToListAsync();
